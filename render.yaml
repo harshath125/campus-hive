@@ -1,0 +1,29 @@
+services:
+  # ── Django Backend ──
+  - type: web
+    name: campushive-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: campus_hive.settings
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: DATABASE_URL
+        sync: false  # You set this manually in Render dashboard
+      - key: GEMINI_API_KEY
+        sync: false  # You set this manually in Render dashboard
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "https://campushive-frontend.onrender.com"
+
+  # ── React Frontend ──
+  - type: web
+    name: campushive-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend

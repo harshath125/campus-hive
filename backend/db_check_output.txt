@@ -1,0 +1,33 @@
+DATABASE_URL host: db.boxpatdnkenkbfpnffqk.supabase.co:5432/postgres
+Connecting to Supabase via psycopg2...
+Connected as user: postgres  db: postgres
+
+Tables in public schema: 14
+  event_tasks                   0 rows
+  events                        3 rows
+  groups                        0 rows
+  incidents                     0 rows
+  poll_options                  0 rows
+  poll_votes                    0 rows
+  polls                         0 rows
+  resources                     1 rows
+  safety_alerts                 1 rows
+  space_members                 1 rows
+  spaces                        1 rows
+  tasks                        24 rows
+  users                         7 rows
+  votes                         0 rows
+
+Enum types: ['aal_level', 'action', 'buckettype', 'code_challenge_method', 'equality_op', 'factor_status', 'factor_type', 'grouptype', 'incidentstatus', 'oauth_authorization_status', 'oauth_client_type', 'oauth_registration_type', 'oauth_response_type', 'one_time_token_type', 'priority', 'privacy', 'severity', 'taskstatus', 'userrole']
+
+Connection OK
+
+--- Flask ORM check ---
+Flask ORM error: (psycopg2.errors.UndefinedColumn) column users.hashed_password does not exist
+LINE 2: ...users.id AS users_id, users.email AS users_email, users.hash...
+                                                             ^
+
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT users.id AS users_id, users.email AS users_email, users.hashed_password AS users_hashed_password, users.name AS users_name, users.avatar AS users_avatar, users.role AS users_role, users.branch AS users_branch, users.section AS users_section, users.year AS users_year, users.tags AS users_tags, users.vibe_score AS users_vibe_score, users.is_active AS users_is_active, users.created_at AS users_created_at, users.updated_at AS users_updated_at 
+FROM users) AS anon_1]
+(Background on this error at: https://sqlalche.me/e/20/f405)

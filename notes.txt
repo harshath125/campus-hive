@@ -1,0 +1,113 @@
+# Campus Hive Project – Technical Overview (Django v2.0)
+
+---
+
+## 1. Full‑Stack Tech Stack
+
+| Layer | Technology | Why Chosen | How Used |
+|-------|------------|------------|----------|
+| **Frontend** | **React (TSX)** | Component‑based UI, fast re‑render, strong ecosystem | All pages (`src/pages/*.tsx`) are React components in TypeScript. |
+| | **Vite** | Lightning‑fast dev server, native ES‑module support | `npm run dev` starts Vite on `http://localhost:5173`. |
+| | **Tailwind CSS** | Utility‑first styling, theming, dark mode | Global styles in `src/index.css`; class‑based styling. |
+| **Backend** | **Django (Python)** | Batteries‑included: admin panel, ORM, auth, security | Project in `backend/campus_hive/`, app in `backend/core/`. |
+| | **Django REST Framework** | Powerful API toolkit | Used for JWT auth, serialization, permissions. |
+| | **SimpleJWT** | JWT token auth for REST APIs | Token issued on login/signup, verified on protected routes. |
+| | **Supabase (PostgreSQL)** | Managed Postgres with SSL | Connection in `.env` via `DATABASE_URL`. |
+| | **Google Gemini AI** | AI‑powered features | Poll summarization, event tasks, vibe insights. |
+| | **TF-IDF + Cosine Similarity** | ML vibe matching algorithm | Weighted multi-factor scoring for student matching. |
+| **DevOps** | **Batch Files** | One‑click setup & launch on Windows | `setup_backend.bat`, `setup_frontend.bat`, `start_all.bat`. |
+
+---
+
+## 2. Django Admin Panel
+
+Access at `http://localhost:8000/admin/` with superuser credentials.
+
+### Features:
+- **Users** – View, edit, activate/deactivate, filter by role/branch/year
+- **Groups (Spaces)** – All spaces with member counts, admin info
+- **Polls & Votes** – All polls with AI insights, vote reasons, option counts
+- **Events & Tasks** – Event planner with Kanban task assignments
+- **Incidents** – Anonymous reports with severity/status management
+- **Activity Logs** – Complete audit trail: login, signup, votes, actions (read‑only)
+
+---
+
+## 3. Vibe Matcher – ML Algorithm
+
+Enhanced multi‑factor matching algorithm:
+1. **TF‑IDF Vectorization** – Weights rare interests higher than common ones
+2. **Cosine Similarity** – Measures angle between interest vectors
+3. **Weighted Scoring** (total = 100%):
+   - Tags similarity: 50% (60% TF‑IDF + 40% Jaccard blended)
+   - Branch match: 15%
+   - Year proximity: 15%
+   - Section match: 10%
+   - Shared tag count bonus: 10%
+4. **Gemini AI Insights** – Personalized compatibility descriptions for top matches
+
+---
+
+## 4. API Endpoints (Django backend on port 8000)
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/auth/signup` | POST | Register, returns JWT |
+| `/api/auth/login` | POST | Authenticate, returns JWT |
+| `/api/auth/me` | GET | Current user profile |
+| `/api/auth/me/update` | PUT | Update profile |
+| `/api/groups/` | GET | List all groups |
+| `/api/groups/create` | POST | Create group |
+| `/api/polls/` | POST | Create poll |
+| `/api/polls/group/<id>` | GET | List polls in group |
+| `/api/polls/<id>/vote` | POST | Vote with reason → triggers AI insight |
+| `/api/events/` | POST | Create event (with AI task generation) |
+| `/api/events/group/<id>` | GET | List events in group |
+| `/api/vibe/matches` | GET | ML vibe matches |
+| `/api/vibe/tags` | POST | Update interest tags |
+| `/api/incidents/report` | POST | Anonymous incident report |
+| `/admin/` | GET | Django admin panel |
+
+---
+
+## 5. Project Structure
+
+```
+vibe project/
+├── batch/
+│   ├── setup_backend.bat    # Django install + migrate + superuser
+│   ├── setup_frontend.bat   # npm install
+│   └── start_all.bat        # Launch Django (8000) + Vite (5173)
+└── campus-hive/
+    ├── backend/
+    │   ├── manage.py             # Django management
+    │   ├── requirements.txt      # Django + DRF + SimpleJWT + Gemini
+    │   ├── .env                  # DATABASE_URL, GEMINI_API_KEY, JWT secret
+    │   ├── campus_hive/          # Django project (settings, urls, wsgi)
+    │   └── core/                 # Main app
+    │       ├── models.py         # User, Group, Poll, Event, Incident, ActivityLog
+    │       ├── admin.py          # Full admin panel config
+    │       ├── urls.py           # API route mapping
+    │       ├── views/            # auth, groups, polls, events, vibe, incidents
+    │       └── utils/            # gemini_utils.py, vibe_algorithm.py
+    └── frontend/
+        ├── src/
+        │   ├── api.ts            # API service (fetch + JWT)
+        │   ├── App.tsx           # Router + Auth context
+        │   └── pages/            # 12 page components
+        └── vite.config.ts        # Proxy → localhost:8000
+```
+
+---
+
+## 6. Quick Start
+
+1. Run `batch\setup_backend.bat` → installs Django, migrates DB, creates admin user
+2. Run `batch\setup_frontend.bat` → installs npm packages
+3. Run `batch\start_all.bat` → starts Django + Vite
+4. Open `http://localhost:5173` → student frontend
+5. Open `http://localhost:8000/admin/` → admin panel
+
+---
+
+*Updated for Django v2.0 migration – March 2026*

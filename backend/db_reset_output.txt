@@ -1,0 +1,50 @@
+Connected to Supabase.
+
+Dropping old Flask tables with wrong schema...
+  Dropped: votes
+  Dropped: poll_options
+  Dropped: polls
+  Dropped: event_tasks
+  Dropped: events
+  Dropped: groups
+  Dropped: incidents
+  Dropped: users
+
+Dropping old enum types...
+  Dropped enum: userrole
+  Dropped enum: grouptype
+  Dropped enum: privacy
+  Dropped enum: taskstatus
+  Dropped enum: priority
+  Dropped enum: severity
+  Dropped enum: incidentstatus
+
+Running db.create_all() via Flask app context...
+Tables created by SQLAlchemy:
+
+  Users:  0 (fresh)
+  Groups: 0 (fresh)
+
+Seeding data...
+
+  Created admin: admin@anits.edu.in
+  Created students: priya@anits.edu.in, rahul@anits.edu.in
+  Created groups: CSE 3-A, AI & ML Club, Fest Committee 2026
+  Created 2 polls with options
+  Created event 'Annual Hackathon 2026' with 6 tasks
+
+✅ All seed data committed!
+
+Final row counts:
+  Users:     3
+  Groups:    3
+  Polls:     2
+  Options:   8
+  Events:    1
+  Tasks:     6
+  Incidents: 1
+
+📋 Login credentials for testing:
+  Admin:   admin@anits.edu.in  / Admin@1234
+  Student: priya@anits.edu.in  / Student@123
+  Student: rahul@anits.edu.in  / Student@123

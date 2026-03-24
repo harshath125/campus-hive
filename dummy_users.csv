@@ -1,0 +1,4 @@
+name,email,branch,section,year,role,password
+Alice Smith,alice@anits.edu.in,CSE,3-A,3,student,defaultpass
+Bob Jones,bob@anits.edu.in,ECE,2-B,2,student,defaultpass
+Carol White,carol@anits.edu.in,IT,4-C,4,student,defaultpass
