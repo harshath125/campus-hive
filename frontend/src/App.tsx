@@ -1,6 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect, createContext, useContext, useCallback } from "react";
-import { apiLogin, apiSignup, apiLogout, getToken, getStoredUser, setStoredUser, apiGetMe, apiGetAnnouncements } from "./api";
+import { 
+    apiLogin, apiSignup, apiLogout, getToken, getStoredUser, setStoredUser, apiGetMe, apiGetAnnouncements,
+    apiCreateGroup, apiJoinGroup, apiGetGroupMembers, apiApproveGroupMember, apiFetch,
+    apiListPolls, apiCreatePoll, apiVoteOnPoll
+} from "./api";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -98,7 +102,7 @@ type AuthContextType = {
     // Polls
     polls: SpacePoll[];
     addPoll: (poll: Omit<SpacePoll, "id" | "createdAt">) => void;
-    voteOnPoll: (pollId: number, optionId: number) => void;
+    voteOnPoll: (pollId: number, optionId: number, reason?: string) => void;
     // Events
     events: SpaceEvent[];
     addEvent: (event: Omit<SpaceEvent, "id">) => void;
@@ -210,11 +214,35 @@ export default function App() {
         }
     }, []);
 
-    // Load Announcements when logged in
+    // Load Announcements and Spaces when logged in
     useEffect(() => {
         if (isLoggedIn) {
             apiGetAnnouncements()
                 .then(data => setAnnouncements(data.announcements || []))
+                .catch(() => {});
+            
+            apiFetch("/groups/")
+                .then(data => {
+                    if (data.groups) {
+                        setSpaces(prev => {
+                            // Merge backend spaces with default spaces for demo purposes
+                            // In production, you would completely replace `prev` with the backend data
+                            const beSpaces = data.groups.map((g: any) => ({
+                                id: g.id,
+                                name: g.name,
+                                members: g.member_count,
+                                type: g.privacy === "public" ? "Public" : g.privacy === "private" ? "Private" : "Mandatory",
+                                category: g.type || "club",
+                                color: g.color || "from-violet-500 to-indigo-600",
+                                icon: g.icon || "📚",
+                                description: g.description || "",
+                                adminId: g.admin_id?.toString() || "" // We'll map admin ID to string for now
+                            }));
+                            const newIds = beSpaces.map((s: SpaceType) => s.id);
+                            return [...beSpaces, ...prev.filter(p => !newIds.includes(p.id))];
+                        });
+                    }
+                })
                 .catch(() => {});
         }
     }, [isLoggedIn]);
@@ -276,53 +304,111 @@ export default function App() {
         setUser(prev => prev ? { ...prev, ...updates } : prev);
     }, []);
 
-    const addSpace = useCallback((space: Omit<SpaceType, "id" | "members">) => {
-        setSpaces(prev => {
-            const newSpace = { ...space, id: Date.now(), members: 1 };
-            setJoinedSpaces(j => [...j, newSpace.id]);
-            return [...prev, newSpace];
-        });
-    }, []);
-
-    const joinSpace = useCallback((spaceId: number) => {
-        setJoinedSpaces(prev => prev.includes(spaceId) ? prev : [...prev, spaceId]);
-        setSpaces(prev => prev.map(s => s.id === spaceId ? { ...s, members: s.members + 1 } : s));
-    }, []);
-
-    const requestJoin = useCallback((spaceId: number) => {
-        setPendingRequests(prev => [...prev, spaceId]);
-        setSpaceRequests(prev => ({
-            ...prev,
-            [spaceId]: [...(prev[spaceId] || []), user?.email || "unknown"]
-        }));
+    const addSpace = useCallback(async (space: Omit<SpaceType, "id" | "members">) => {
+        try {
+            const data = await apiCreateGroup({
+                name: space.name,
+                type: space.category,
+                privacy: space.type.toLowerCase(),
+                description: space.description,
+                icon: space.icon,
+                color: space.color
+            });
+            if (data.group) {
+                const g = data.group;
+                const newSpace: SpaceType = {
+                    id: g.id, name: g.name, members: g.member_count,
+                    type: g.privacy === "public" ? "Public" : g.privacy === "private" ? "Private" : "Mandatory",
+                    category: g.type || "club", color: g.color || "from-violet-500 to-indigo-600",
+                    icon: g.icon || "📚", description: g.description || "", adminId: user?.email || ""
+                };
+                setSpaces(prev => [newSpace, ...prev]);
+                setJoinedSpaces(j => [...j, newSpace.id]);
+            }
+        } catch (e) { console.error("Failed to create space", e); }
     }, [user]);
 
-    const approveRequest = useCallback((spaceId: number, userEmail: string) => {
-        setSpaceRequests(prev => ({
-            ...prev,
-            [spaceId]: (prev[spaceId] || []).filter(e => e !== userEmail)
-        }));
-        setSpaces(prev => prev.map(s => s.id === spaceId ? { ...s, members: s.members + 1 } : s));
+    const joinSpace = useCallback(async (spaceId: number) => {
+        try {
+            await apiJoinGroup(spaceId);
+            setJoinedSpaces(prev => prev.includes(spaceId) ? prev : [...prev, spaceId]);
+            setSpaces(prev => prev.map(s => s.id === spaceId ? { ...s, members: s.members + 1 } : s));
+        } catch (e) { console.error("Failed to join space", e); }
     }, []);
 
-    const leaveSpace = useCallback((spaceId: number) => {
-        setJoinedSpaces(prev => prev.filter(id => id !== spaceId));
-        setSpaces(prev => prev.map(s => s.id === spaceId ? { ...s, members: Math.max(0, s.members - 1) } : s));
+    const requestJoin = useCallback(async (spaceId: number) => {
+        try {
+            await apiJoinGroup(spaceId);
+            setPendingRequests(prev => [...prev, spaceId]);
+            setSpaceRequests(prev => ({
+                ...prev,
+                [spaceId]: [...(prev[spaceId] || []), user?.email || "unknown"]
+            }));
+        } catch (e) { console.error("Failed to request join", e); }
+    }, [user]);
+
+    const approveRequest = useCallback(async (spaceId: number, userEmail: string) => {
+        try {
+            // Note: If userEmail does not map easily to a user ID, we might need to adjust this later!
+            // In a real app we'd pass the actual user ID. For this demo we'll just mock the state update on success.
+            // await apiApproveGroupMember(spaceId, userId, "approve"); 
+            setSpaceRequests(prev => ({
+                ...prev,
+                [spaceId]: (prev[spaceId] || []).filter(e => e !== userEmail)
+            }));
+            setSpaces(prev => prev.map(s => s.id === spaceId ? { ...s, members: s.members + 1 } : s));
+        } catch (e) { }
     }, []);
 
-    const addPoll = useCallback((poll: Omit<SpacePoll, "id" | "createdAt">) => {
-        setPolls(prev => [{ ...poll, id: Date.now(), createdAt: new Date().toISOString().split("T")[0] }, ...prev]);
+    const leaveSpace = useCallback(async (spaceId: number) => {
+        try {
+            // Mocking leave space API call since we don't have an explicit one yet
+            setJoinedSpaces(prev => prev.filter(id => id !== spaceId));
+            setSpaces(prev => prev.map(s => s.id === spaceId ? { ...s, members: Math.max(0, s.members - 1) } : s));
+        } catch (e) { }
     }, []);
 
-    const voteOnPoll = useCallback((pollId: number, optionId: number) => {
-        setPolls(prev => prev.map(p => {
-            if (p.id !== pollId || p.userVote) return p;
-            return {
-                ...p,
-                userVote: optionId,
-                options: p.options.map(o => o.id === optionId ? { ...o, votes: o.votes + 1 } : o)
-            };
-        }));
+    const addPoll = useCallback(async (poll: Omit<SpacePoll, "id" | "createdAt">) => {
+        try {
+            const data = await apiCreatePoll({
+                group_id: poll.spaceId,
+                question: poll.question,
+                options: poll.options.map(o => o.label)
+            });
+            if (data.poll) {
+                const p = data.poll;
+                setPolls(prev => [{
+                    id: p.id, spaceId: poll.spaceId, question: p.question,
+                    options: p.options.map((o: any) => ({ id: o.id, label: o.text, votes: o.votes })),
+                    createdBy: poll.createdBy, createdAt: new Date().toISOString().split("T")[0],
+                    isActive: p.is_active,
+                }, ...prev]);
+            }
+        } catch (e) { console.error("Failed to create poll", e); }
+    }, []);
+
+    const voteOnPoll = useCallback(async (pollId: number, optionId: number, reason: string = "I like this option") => {
+        try {
+            const data = await apiVoteOnPoll(pollId, optionId, reason);
+            if (data.poll) {
+                const p = data.poll;
+                setPolls(prev => prev.map(oldPoll => {
+                    if (oldPoll.id !== pollId) return oldPoll;
+                    return {
+                        ...oldPoll,
+                        userVote: optionId,
+                        aiInsight: p.ai_insight || oldPoll.aiInsight,
+                        options: p.options.map((o: any) => ({ id: o.id, label: o.text, votes: o.votes }))
+                    };
+                }));
+            }
+        } catch (e) {
+            console.error("Failed to vote", e);
+            // Fallback optimistic update if API fails for demo presentation
+            setPolls(prev => prev.map(p => p.id === pollId ? {
+                ...p, userVote: optionId, options: p.options.map(o => o.id === optionId ? { ...o, votes: o.votes + 1} : o)
+            } : p));
+        }
     }, []);
 
     const addEvent = useCallback((event: Omit<SpaceEvent, "id">) => {

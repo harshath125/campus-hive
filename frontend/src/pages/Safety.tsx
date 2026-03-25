@@ -1,18 +1,40 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Shield, AlertTriangle, Send, Eye, EyeOff, Lock, CheckCircle } from "lucide-react";
+import { Shield, AlertTriangle, Send, Eye, EyeOff, Lock, CheckCircle, Loader } from "lucide-react";
+import { apiReportIncident } from "../api";
 
 const severityLevels = [
-    { level: 1, label: "Low", color: "bg-yellow-500", desc: "Verbal discomfort or mild intimidation" },
-    { level: 2, label: "Medium", color: "bg-orange-500", desc: "Repeated harassment or targeted bullying" },
-    { level: 3, label: "High", color: "bg-red-500", desc: "Physical threat, assault, or severe abuse" },
+    { level: 1, label: "Low", color: "bg-yellow-500", desc: "Verbal discomfort or mild intimidation", value: "yellow" },
+    { level: 2, label: "Medium", color: "bg-orange-500", desc: "Repeated harassment or targeted bullying", value: "orange" },
+    { level: 3, label: "High", color: "bg-red-500", desc: "Physical threat, assault, or severe abuse", value: "red" },
 ];
 
 export default function Safety() {
-    const [severity, setSeverity] = useState(1);
+    const [severity, setSeverity] = useState<number>(1);
     const [content, setContent] = useState("");
     const [submitted, setSubmitted] = useState(false);
     const [stealthMode, setStealthMode] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (content.length < 20) return;
+        
+        setLoading(true);
+        setErrorMsg("");
+        try {
+            const levelObj = severityLevels.find(s => s.level === severity);
+            const severityValue = levelObj ? levelObj.value : "yellow";
+            
+            await apiReportIncident({ severity: severityValue, description: content, location: "Campus" });
+            setSubmitted(true);
+        } catch (err: any) {
+            setErrorMsg(err.message || "Failed to submit report. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div>
@@ -39,7 +61,7 @@ export default function Safety() {
             </div>
 
             {!submitted ? (
-                <motion.form onSubmit={e => { e.preventDefault(); if (content.length >= 20) setSubmitted(true); }} className="glass rounded-2xl p-6"
+                <motion.form onSubmit={handleSubmit} className="glass rounded-2xl p-6"
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                     <div className="mb-6">
                         <label className="block text-sm font-semibold text-white mb-3">Severity Level</label>
@@ -63,6 +85,13 @@ export default function Safety() {
                             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:border-red-500/50 transition-all outline-none resize-none h-28" />
                         <p className="text-xs text-slate-500 mt-1">{content.length}/20 minimum characters</p>
                     </div>
+                    
+                    {errorMsg && (
+                        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+                            {errorMsg}
+                        </div>
+                    )}
+
                     {severity === 3 && (
                         <div className="mb-5 flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
                             <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
@@ -72,9 +101,10 @@ export default function Safety() {
                             </div>
                         </div>
                     )}
-                    <button type="submit" disabled={content.length < 20}
+                    <button type="submit" disabled={content.length < 20 || loading}
                         className="w-full py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-red-500 to-rose-600 rounded-xl hover:from-red-600 hover:to-rose-700 transition-all flex items-center justify-center gap-2 disabled:opacity-40">
-                        <Send className="w-4 h-4" /> Submit Anonymous Report
+                        {loading ? <Loader className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} 
+                        {loading ? "Submitting..." : "Submit Anonymous Report"}
                     </button>
                 </motion.form>
             ) : (
@@ -84,7 +114,7 @@ export default function Safety() {
                     </div>
                     <h3 className="text-xl font-bold text-white mb-2">Report Submitted Safely</h3>
                     <p className="text-slate-400 text-sm mb-6 max-w-sm mx-auto">Your report has been received. No identifying information has been linked to this submission.</p>
-                    <button onClick={() => { setSubmitted(false); setContent(""); setSeverity(1); }}
+                    <button onClick={() => { setSubmitted(false); setContent(""); setSeverity(1); setErrorMsg(""); }}
                         className="px-6 py-2.5 text-sm font-medium glass rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-all">
                         Submit Another Report
                     </button>

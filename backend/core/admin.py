@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .models import (
-    User, Group, Poll, PollOption, Vote,
+    User, Group, GroupMember, Poll, PollOption, Vote,
     Event, EventTask, Incident, ActivityLog,
     Announcement, Resource,
 )
@@ -55,6 +55,22 @@ class GroupAdmin(admin.ModelAdmin):
     list_filter = ("type", "privacy")
     search_fields = ("name", "description")
     raw_id_fields = ("admin",)
+
+
+class GroupMemberInline(admin.TabularInline):
+    model = GroupMember
+    extra = 0
+    raw_id_fields = ("user",)
+    readonly_fields = ("joined_at",)
+
+
+@admin.register(GroupMember)
+class GroupMemberAdmin(admin.ModelAdmin):
+    list_display = ("user", "group", "role", "status", "joined_at")
+    list_filter = ("status", "role")
+    search_fields = ("user__email", "user__name", "group__name")
+    raw_id_fields = ("user", "group")
+    list_editable = ("status",)
 
 
 # ── Poll Admin ──────────────────────────────────────────────────────────────

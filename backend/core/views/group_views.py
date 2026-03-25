@@ -127,3 +127,111 @@ def delete_group(request, group_id):
 
     group.delete()
     return JsonResponse({"message": "Group deleted"})
+
+# ── Membership Management ────────────────────────────────────────────────────
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def request_join_group(request, group_id):
+    """Request to join a group."""
+    user = _get_user_from_token(request)
+    if not user:
+        return JsonResponse({"error": "Authorization token is missing or invalid"}, status=401)
+
+    try:
+        group = Group.objects.get(id=group_id)
+    except Group.DoesNotExist:
+        return JsonResponse({"error": "Group not found"}, status=404)
+
+    from core.models import GroupMember
+
+    if GroupMember.objects.filter(group=group, user=user).exists():
+        return JsonResponse({"error": "You are already a member or have a pending request"}, status=400)
+
+    # Note: If privacy is PUBLIC, we could auto-approve. If PRIVATE, it's PENDING.
+    status = GroupMember.StatusChoice.APPROVED if group.privacy == Privacy.PUBLIC else GroupMember.StatusChoice.PENDING
+
+    member = GroupMember.objects.create(
+        group=group,
+        user=user,
+        role="member",
+        status=status
+    )
+    
+    if status == GroupMember.StatusChoice.APPROVED:
+        group.member_count += 1
+        group.save()
+        msg = f"Successfully joined {group.name}"
+    else:
+        msg = f"Join request sent for {group.name}"
+
+    ActivityLog.objects.create(
+        user=user, action="join_group",
+        details=msg,
+        ip_address=_get_client_ip(request),
+    )
+
+    return JsonResponse({"message": msg, "member": member.to_dict()}, status=201)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def approve_group_member(request, group_id, user_id):
+    """Admin approves or rejects a pending join request."""
+    admin_user = _get_user_from_token(request)
+    if not admin_user:
+        return JsonResponse({"error": "Authorization token is missing or invalid"}, status=401)
+
+    try:
+        group = Group.objects.get(id=group_id)
+    except Group.DoesNotExist:
+        return JsonResponse({"error": "Group not found"}, status=404)
+
+    if group.admin_id != admin_user.id:
+        return JsonResponse({"error": "Only the group admin can approve requests"}, status=403)
+
+    from core.models import GroupMember
+    try:
+        membership = GroupMember.objects.get(group_id=group_id, user_id=user_id)
+    except GroupMember.DoesNotExist:
+        return JsonResponse({"error": "Membership request not found"}, status=404)
+
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        data = {}
+
+    action = data.get("action", "approve").lower()
+    
+    if action == "approve":
+        if membership.status != GroupMember.StatusChoice.APPROVED:
+            membership.status = GroupMember.StatusChoice.APPROVED
+            membership.save()
+            group.member_count += 1
+            group.save()
+        return JsonResponse({"message": "Member approved", "member": membership.to_dict()})
+    elif action == "reject":
+        membership.delete()
+        return JsonResponse({"message": "Request rejected"})
+    else:
+        return JsonResponse({"error": "Invalid action. Use 'approve' or 'reject'"}, status=400)
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_group_members(request, group_id):
+    """Get members of a group (separates approved vs pending)."""
+    try:
+        group = Group.objects.get(id=group_id)
+    except Group.DoesNotExist:
+        return JsonResponse({"error": "Group not found"}, status=404)
+
+    from core.models import GroupMember
+    memberships = GroupMember.objects.filter(group=group).select_related('user')
+    
+    approved = [m.to_dict() for m in memberships if m.status == GroupMember.StatusChoice.APPROVED]
+    pending = [m.to_dict() for m in memberships if m.status == GroupMember.StatusChoice.PENDING]
+    
+    return JsonResponse({
+        "approved": approved,
+        "pending": pending
+    })

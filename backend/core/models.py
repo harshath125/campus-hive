@@ -177,6 +177,37 @@ class Group(models.Model):
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
+class GroupMember(models.Model):
+    class StatusChoice(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name="memberships")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="group_memberships")
+    role = models.CharField(max_length=20, default="member") # "admin" or "member"
+    status = models.CharField(max_length=20, choices=StatusChoice.choices, default=StatusChoice.APPROVED)
+    joined_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = "ch_group_members"
+        unique_together = ("group", "user")
+
+    def __str__(self):
+        return f"{self.user.name} in {self.group.name} ({self.status})"
+        
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "group_id": self.group_id,
+            "user_id": self.user_id,
+            "user_name": self.user.name,
+            "user_avatar": self.user.avatar,
+            "role": self.role,
+            "status": self.status,
+            "joined_at": self.joined_at.isoformat() if self.joined_at else None,
+        }
+
 
 # ─── Poll Model ────────────────────────────────────────────────────────────────
 

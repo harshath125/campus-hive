@@ -18,6 +18,9 @@ urlpatterns = [
     path("groups/<int:group_id>", group_views.get_group),
     path("groups/<int:group_id>/update", group_views.update_group),
     path("groups/<int:group_id>/delete", group_views.delete_group),
+    path("groups/<int:group_id>/join", group_views.request_join_group),
+    path("groups/<int:group_id>/members", group_views.get_group_members),
+    path("groups/<int:group_id>/members/<int:user_id>/approve", group_views.approve_group_member),
 
     # ── Polls ────────────────────────────────────────────────────────────
     path("polls/", poll_views.create_poll),

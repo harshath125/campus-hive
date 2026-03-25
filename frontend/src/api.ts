@@ -41,7 +41,7 @@ function setStoredUser(user: any) {
   localStorage.setItem("ch_user", JSON.stringify(user));
 }
 
-async function apiFetch(path: string, options: RequestInit = {}): Promise<any> {
+export async function apiFetch(path: string, options: RequestInit = {}): Promise<any> {
   const token = getToken();
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string> || {}),
@@ -123,6 +123,21 @@ export async function apiUpdateGroup(id: number, data: Record<string, any>) {
 
 export async function apiDeleteGroup(id: number) {
   return apiFetch(`/groups/${id}/delete`, { method: "DELETE" });
+}
+
+export async function apiJoinGroup(id: number) {
+  return apiFetch(`/groups/${id}/join`, { method: "POST" });
+}
+
+export async function apiGetGroupMembers(id: number) {
+  return apiFetch(`/groups/${id}/members`);
+}
+
+export async function apiApproveGroupMember(groupId: number, userId: number, action: "approve" | "reject") {
+  return apiFetch(`/groups/${groupId}/members/${userId}/approve`, {
+    method: "POST",
+    body: JSON.stringify({ action }),
+  });
 }
 
 // ── Polls ────────────────────────────────────────────────────────────────────

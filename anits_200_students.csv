@@ -1,0 +1,201 @@
+name,email,branch,section,year,tags
+Priya Iyer,priya.iyer0@anits.edu.in,CSM,2-A,2,Robotics|Docker|Cybersecurity
+Mounika Chandra,mounika.chandra1@anits.edu.in,CSE,3-A,3,Cybersecurity|Python|Cloud
+Aarav Yadav,aarav.yadav2@anits.edu.in,CSM,2-B,2,IoT|Cybersecurity|ML
+Neha Joshi,neha.joshi3@anits.edu.in,MECH,3-B,3,Robotics|Cybersecurity|Docker
+Meghana Gupta,meghana.gupta4@anits.edu.in,MECH,1-B,1,Cybersecurity|ML|Python
+Suresh Sharma,suresh.sharma5@anits.edu.in,CSE,3-A,3,DevOps|React|Python
+Priya Chandra,priya.chandra6@anits.edu.in,CSE,1-B,1,AI|Python|Design
+Rahul Kumar,rahul.kumar7@anits.edu.in,CSM,3-A,3,ML|UI/UX|Data Science
+Gaurav Nair,gaurav.nair8@anits.edu.in,MECH,1-A,1,Robotics|Cybersecurity|AI
+Aditya Krishna,aditya.krishna9@anits.edu.in,MECH,3-A,3,Cybersecurity|Hackathons|Robotics
+Amit Reddy,amit.reddy10@anits.edu.in,CSM,3-B,3,Robotics|Cybersecurity|Hackathons
+Tejaswini Mishra,tejaswini.mishra11@anits.edu.in,MECH,1-A,1,Data Science|Design|Docker
+Vivaan Agarwal,vivaan.agarwal12@anits.edu.in,CSM,2-A,2,Cloud|Python|Data Science
+Divya Sharma,divya.sharma13@anits.edu.in,MECH,4-A,4,React|Python|AI
+Kiran Reddy,kiran.reddy14@anits.edu.in,CSE,3-A,3,ML|Docker|Python
+Nikhil Verma,nikhil.verma15@anits.edu.in,CSE,1-A,1,DevOps|AI|UI/UX
+Vikram Kumar,vikram.kumar16@anits.edu.in,ECE,2-A,2,AI|ML|Web Dev
+Mounika Naidu,mounika.naidu17@anits.edu.in,CSM,1-A,1,Cybersecurity|Web Dev|DevOps
+Rohit Patel,rohit.patel18@anits.edu.in,MECH,2-A,2,Docker|Design|Hackathons
+Sneha Chandra,sneha.chandra19@anits.edu.in,ECE,3-A,3,Design|IoT|Cloud
+Tejaswini Gupta,tejaswini.gupta20@anits.edu.in,CSM,1-B,1,UI/UX|React|Design
+Siddharth Reddy,siddharth.reddy21@anits.edu.in,MECH,2-B,2,Python|ML|Hackathons
+Aarav Chandra,aarav.chandra22@anits.edu.in,CSE,4-A,4,Docker|Python|React
+Lavanya Reddy,lavanya.reddy23@anits.edu.in,ECE,2-A,2,IoT|React|DevOps
+Arjun Krishna,arjun.krishna24@anits.edu.in,MECH,3-B,3,IoT|Robotics|DevOps
+Meghana Krishna,meghana.krishna25@anits.edu.in,CSM,1-A,1,UI/UX|ML|IoT
+Varun Das,varun.das26@anits.edu.in,CSE,1-A,1,Robotics|Design|Cybersecurity
+Rohit Krishna,rohit.krishna27@anits.edu.in,CSE,3-A,3,Docker|Python|Robotics
+Vikram Singh,vikram.singh28@anits.edu.in,ECE,4-B,4,IoT|ML|DevOps
+Pooja Gupta,pooja.gupta29@anits.edu.in,ECE,3-A,3,AI|Hackathons|Data Science
+Priya Nair,priya.nair30@anits.edu.in,ECE,4-A,4,React|Data Science|Cloud
+Priya Das,priya.das31@anits.edu.in,CSE,3-A,3,React|IoT|AI
+Siddharth Singh,siddharth.singh32@anits.edu.in,MECH,2-A,2,IoT|Python|Web Dev
+Meghana Rao,meghana.rao33@anits.edu.in,CSE,1-A,1,React|UI/UX|ML
+Sneha Agarwal,sneha.agarwal34@anits.edu.in,CSE,3-A,3,AI|ML|Web Dev
+Tejaswini Verma,tejaswini.verma35@anits.edu.in,MECH,2-A,2,Robotics|UI/UX|Docker
+Vivaan Das,vivaan.das36@anits.edu.in,MECH,1-A,1,Docker|Robotics|Cybersecurity
+Divya Sharma,divya.sharma37@anits.edu.in,MECH,4-B,4,Docker|Robotics|Cloud
+Pooja Singh,pooja.singh38@anits.edu.in,ECE,2-A,2,Python|Design|Hackathons
+Vikram Yadav,vikram.yadav39@anits.edu.in,ECE,3-B,3,UI/UX|Docker|IoT
+Karthik Verma,karthik.verma40@anits.edu.in,MECH,1-B,1,Data Science|Cybersecurity|DevOps
+Priya Gupta,priya.gupta41@anits.edu.in,MECH,3-A,3,Hackathons|Docker|IoT
+Lavanya Chandra,lavanya.chandra42@anits.edu.in,MECH,1-A,1,Web Dev|Cybersecurity|DevOps
+Ananya Reddy,ananya.reddy43@anits.edu.in,ECE,1-B,1,React|DevOps|Python
+Lavanya Das,lavanya.das44@anits.edu.in,MECH,1-B,1,ML|DevOps|Data Science
+Harsha Rao,harsha.rao45@anits.edu.in,MECH,1-A,1,UI/UX|Robotics|Design
+Vikram Agarwal,vikram.agarwal46@anits.edu.in,CSM,1-B,1,UI/UX|Web Dev|Cybersecurity
+Siddharth Chandra,siddharth.chandra47@anits.edu.in,CSE,2-B,2,DevOps|ML|Cloud
+Neha Yadav,neha.yadav48@anits.edu.in,ECE,1-B,1,Web Dev|Docker|IoT
+Tejaswini Chandra,tejaswini.chandra49@anits.edu.in,CSM,3-A,3,React|IoT|Cybersecurity
+Varun Yadav,varun.yadav50@anits.edu.in,CSE,4-A,4,IoT|Cybersecurity|UI/UX
+Amit Gupta,amit.gupta51@anits.edu.in,MECH,2-A,2,Web Dev|IoT|Docker
+Suresh Chandra,suresh.chandra52@anits.edu.in,CSE,2-A,2,Design|Docker|ML
+Varun Babu,varun.babu53@anits.edu.in,CSE,2-B,2,Design|Cloud|Data Science
+Siddharth Reddy,siddharth.reddy54@anits.edu.in,MECH,1-B,1,Robotics|AI|Docker
+Aditya Krishna,aditya.krishna55@anits.edu.in,CSE,3-B,3,DevOps|AI|Hackathons
+Rahul Patel,rahul.patel56@anits.edu.in,ECE,4-B,4,Design|Robotics|React
+Ravi Krishna,ravi.krishna57@anits.edu.in,CSM,1-B,1,Web Dev|Hackathons|Cybersecurity
+Mounika Babu,mounika.babu58@anits.edu.in,CSM,4-B,4,AI|UI/UX|Data Science
+Siddharth Yadav,siddharth.yadav59@anits.edu.in,CSE,1-A,1,Design|AI|Cybersecurity
+Ravi Naidu,ravi.naidu60@anits.edu.in,ECE,1-A,1,Robotics|Cybersecurity|DevOps
+Varun Krishna,varun.krishna61@anits.edu.in,MECH,4-A,4,IoT|Cybersecurity|Python
+Siddharth Yadav,siddharth.yadav62@anits.edu.in,CSE,1-A,1,Cybersecurity|Python|Cloud
+Tejaswini Mishra,tejaswini.mishra63@anits.edu.in,CSE,4-B,4,Cybersecurity|Data Science|Robotics
+Ravi Yadav,ravi.yadav64@anits.edu.in,CSE,3-A,3,ML|DevOps|Robotics
+Varun Sharma,varun.sharma65@anits.edu.in,CSE,3-A,3,UI/UX|Robotics|Docker
+Karthik Chandra,karthik.chandra66@anits.edu.in,MECH,4-B,4,IoT|Cybersecurity|Python
+Aarav Iyer,aarav.iyer67@anits.edu.in,CSE,2-B,2,Cloud|Python|ML
+Swathi Kapoor,swathi.kapoor68@anits.edu.in,MECH,2-B,2,Cybersecurity|Web Dev|Cloud
+Kiran Reddy,kiran.reddy69@anits.edu.in,MECH,2-B,2,Design|IoT|React
+Karthik Iyer,karthik.iyer70@anits.edu.in,CSM,3-B,3,AI|Data Science|Cybersecurity
+Vikram Sharma,vikram.sharma71@anits.edu.in,ECE,4-B,4,DevOps|Docker|Cybersecurity
+Lavanya Das,lavanya.das72@anits.edu.in,CSE,2-B,2,Python|Cloud|AI
+Neha Gupta,neha.gupta73@anits.edu.in,CSE,1-B,1,AI|Web Dev|Data Science
+Ananya Kumar,ananya.kumar74@anits.edu.in,MECH,2-A,2,Robotics|Cloud|UI/UX
+Karthik Patel,karthik.patel75@anits.edu.in,MECH,2-B,2,ML|UI/UX|AI
+Karthik Patel,karthik.patel76@anits.edu.in,MECH,4-B,4,IoT|Hackathons|UI/UX
+Gaurav Chandra,gaurav.chandra77@anits.edu.in,CSE,3-B,3,Web Dev|Cybersecurity|Hackathons
+Mounika Joshi,mounika.joshi78@anits.edu.in,CSE,3-B,3,Data Science|UI/UX|Cloud
+Kiran Das,kiran.das79@anits.edu.in,MECH,3-A,3,React|Docker|Web Dev
+Neha Naidu,neha.naidu80@anits.edu.in,ECE,4-A,4,Web Dev|UI/UX|AI
+Manoj Verma,manoj.verma81@anits.edu.in,MECH,2-A,2,UI/UX|Cybersecurity|Python
+Rahul Das,rahul.das82@anits.edu.in,CSM,2-A,2,DevOps|React|ML
+Sneha Patel,sneha.patel83@anits.edu.in,CSE,3-B,3,Hackathons|Cybersecurity|AI
+Amit Verma,amit.verma84@anits.edu.in,CSM,4-B,4,Cybersecurity|Data Science|Web Dev
+Aarav Iyer,aarav.iyer85@anits.edu.in,ECE,1-A,1,Python|Data Science|ML
+Ananya Yadav,ananya.yadav86@anits.edu.in,CSE,4-A,4,Hackathons|UI/UX|Cybersecurity
+Vikram Mishra,vikram.mishra87@anits.edu.in,CSM,2-A,2,DevOps|Data Science|Docker
+Tejaswini Rao,tejaswini.rao88@anits.edu.in,CSE,3-A,3,Hackathons|Docker|Python
+Rahul Gupta,rahul.gupta89@anits.edu.in,MECH,2-B,2,Data Science|Robotics|AI
+Amit Naidu,amit.naidu90@anits.edu.in,CSE,2-A,2,ML|IoT|DevOps
+Swathi Krishna,swathi.krishna91@anits.edu.in,MECH,3-B,3,Web Dev|Data Science|ML
+Amit Nair,amit.nair92@anits.edu.in,MECH,4-B,4,Data Science|Hackathons|Robotics
+Sai Naidu,sai.naidu93@anits.edu.in,CSE,3-B,3,Docker|Cloud|UI/UX
+Rohit Iyer,rohit.iyer94@anits.edu.in,ECE,1-B,1,Web Dev|Data Science|Python
+Swathi Iyer,swathi.iyer95@anits.edu.in,ECE,1-B,1,Data Science|Cloud|Robotics
+Aarav Naidu,aarav.naidu96@anits.edu.in,ECE,2-A,2,AI|Docker|UI/UX
+Manoj Agarwal,manoj.agarwal97@anits.edu.in,CSE,1-B,1,React|Robotics|Python
+Siddharth Joshi,siddharth.joshi98@anits.edu.in,ECE,1-B,1,Docker|Cybersecurity|IoT
+Divya Babu,divya.babu99@anits.edu.in,ECE,4-B,4,Python|Docker|ML
+Pooja Verma,pooja.verma100@anits.edu.in,CSE,4-A,4,React|Robotics|Python
+Neha Das,neha.das101@anits.edu.in,CSM,2-A,2,Data Science|Design|Python
+Meghana Chandra,meghana.chandra102@anits.edu.in,CSE,1-B,1,ML|Hackathons|Python
+Ananya Mishra,ananya.mishra103@anits.edu.in,CSE,3-B,3,Cloud|AI|Robotics
+Mounika Rao,mounika.rao104@anits.edu.in,MECH,4-B,4,DevOps|Cybersecurity|Docker
+Aarav Verma,aarav.verma105@anits.edu.in,MECH,2-B,2,Hackathons|AI|Design
+Arjun Kumar,arjun.kumar106@anits.edu.in,MECH,2-B,2,AI|React|UI/UX
+Siddharth Kumar,siddharth.kumar107@anits.edu.in,CSM,1-B,1,Robotics|Web Dev|Cybersecurity
+Harsha Reddy,harsha.reddy108@anits.edu.in,ECE,2-B,2,UI/UX|Python|DevOps
+Ananya Reddy,ananya.reddy109@anits.edu.in,ECE,2-B,2,Cybersecurity|Data Science|React
+Nikhil Yadav,nikhil.yadav110@anits.edu.in,ECE,4-B,4,Python|Robotics|DevOps
+Aarav Kapoor,aarav.kapoor111@anits.edu.in,CSM,3-A,3,React|IoT|ML
+Ravi Chandra,ravi.chandra112@anits.edu.in,CSM,2-A,2,Cloud|Python|ML
+Amit Naidu,amit.naidu113@anits.edu.in,ECE,2-B,2,Web Dev|Design|React
+Neha Joshi,neha.joshi114@anits.edu.in,CSM,3-A,3,Web Dev|Design|ML
+Sai Patel,sai.patel115@anits.edu.in,CSM,1-A,1,AI|UI/UX|Cloud
+Aditya Chandra,aditya.chandra116@anits.edu.in,ECE,2-A,2,Python|Web Dev|AI
+Sai Krishna,sai.krishna117@anits.edu.in,MECH,4-B,4,Python|Web Dev|ML
+Harsha Rao,harsha.rao118@anits.edu.in,ECE,1-B,1,DevOps|Data Science|IoT
+Lavanya Reddy,lavanya.reddy119@anits.edu.in,MECH,3-A,3,React|Docker|Python
+Kiran Krishna,kiran.krishna120@anits.edu.in,CSM,4-B,4,Cybersecurity|Cloud|Python
+Neha Yadav,neha.yadav121@anits.edu.in,MECH,2-B,2,DevOps|Web Dev|Cybersecurity
+Mounika Das,mounika.das122@anits.edu.in,CSE,4-B,4,Cybersecurity|Design|Docker
+Karthik Das,karthik.das123@anits.edu.in,ECE,3-B,3,AI|Python|Docker
+Aarav Verma,aarav.verma124@anits.edu.in,ECE,3-B,3,Robotics|Cybersecurity|IoT
+Harsha Gupta,harsha.gupta125@anits.edu.in,CSE,3-B,3,Python|UI/UX|DevOps
+Karthik Babu,karthik.babu126@anits.edu.in,CSM,4-B,4,Cybersecurity|IoT|ML
+Siddharth Verma,siddharth.verma127@anits.edu.in,MECH,2-B,2,IoT|DevOps|AI
+Harsha Yadav,harsha.yadav128@anits.edu.in,ECE,4-A,4,Python|Cloud|Design
+Ravi Verma,ravi.verma129@anits.edu.in,CSE,2-B,2,AI|Cloud|DevOps
+Harsha Gupta,harsha.gupta130@anits.edu.in,CSM,4-A,4,Cybersecurity|AI|UI/UX
+Harsha Nair,harsha.nair131@anits.edu.in,MECH,1-A,1,Docker|AI|Cybersecurity
+Suresh Chandra,suresh.chandra132@anits.edu.in,MECH,3-A,3,Docker|Cybersecurity|Data Science
+Lavanya Nair,lavanya.nair133@anits.edu.in,ECE,1-B,1,Design|DevOps|Docker
+Nikhil Das,nikhil.das134@anits.edu.in,CSE,2-B,2,DevOps|Cloud|Python
+Sneha Naidu,sneha.naidu135@anits.edu.in,ECE,1-A,1,Data Science|Design|Web Dev
+Vivaan Mishra,vivaan.mishra136@anits.edu.in,CSE,4-B,4,Python|ML|Cloud
+Harsha Nair,harsha.nair137@anits.edu.in,CSM,2-B,2,React|AI|IoT
+Meghana Das,meghana.das138@anits.edu.in,MECH,4-B,4,UI/UX|Hackathons|AI
+Varun Kapoor,varun.kapoor139@anits.edu.in,CSM,3-A,3,Docker|Hackathons|DevOps
+Pooja Reddy,pooja.reddy140@anits.edu.in,CSE,2-B,2,Cloud|Python|React
+Nikhil Nair,nikhil.nair141@anits.edu.in,CSM,1-B,1,Cloud|Python|Cybersecurity
+Sai Kumar,sai.kumar142@anits.edu.in,MECH,2-A,2,Cloud|Cybersecurity|IoT
+Neha Patel,neha.patel143@anits.edu.in,CSM,1-B,1,Python|Web Dev|Design
+Ananya Das,ananya.das144@anits.edu.in,CSM,2-A,2,Hackathons|Docker|Cloud
+Meghana Chandra,meghana.chandra145@anits.edu.in,MECH,2-B,2,Robotics|Design|Hackathons
+Varun Naidu,varun.naidu146@anits.edu.in,CSM,4-B,4,Python|IoT|React
+Divya Yadav,divya.yadav147@anits.edu.in,MECH,3-B,3,Cloud|Design|Robotics
+Pooja Kumar,pooja.kumar148@anits.edu.in,ECE,4-B,4,AI|Cybersecurity|UI/UX
+Nikhil Krishna,nikhil.krishna149@anits.edu.in,CSM,2-A,2,Web Dev|Cloud|Docker
+Suresh Rao,suresh.rao150@anits.edu.in,CSM,1-B,1,Python|Robotics|Docker
+Nikhil Singh,nikhil.singh151@anits.edu.in,MECH,1-A,1,Robotics|Docker|Python
+Lavanya Iyer,lavanya.iyer152@anits.edu.in,CSM,2-B,2,IoT|Robotics|Cloud
+Aarav Reddy,aarav.reddy153@anits.edu.in,MECH,1-B,1,ML|Robotics|Docker
+Manoj Sharma,manoj.sharma154@anits.edu.in,CSE,4-A,4,UI/UX|Cybersecurity|Web Dev
+Lavanya Verma,lavanya.verma155@anits.edu.in,CSM,1-A,1,React|AI|Design
+Priya Kumar,priya.kumar156@anits.edu.in,CSM,2-A,2,Python|DevOps|Cloud
+Siddharth Gupta,siddharth.gupta157@anits.edu.in,CSM,2-A,2,Hackathons|DevOps|Python
+Manoj Iyer,manoj.iyer158@anits.edu.in,CSM,1-A,1,Cybersecurity|Python|Docker
+Amit Mishra,amit.mishra159@anits.edu.in,MECH,1-B,1,Robotics|UI/UX|Data Science
+Gaurav Yadav,gaurav.yadav160@anits.edu.in,ECE,3-B,3,Cloud|DevOps|AI
+Neha Joshi,neha.joshi161@anits.edu.in,MECH,1-A,1,IoT|Hackathons|Cloud
+Gaurav Sharma,gaurav.sharma162@anits.edu.in,CSE,3-B,3,Web Dev|Cybersecurity|DevOps
+Priya Nair,priya.nair163@anits.edu.in,ECE,2-B,2,Cloud|Robotics|Python
+Aarav Joshi,aarav.joshi164@anits.edu.in,CSE,2-A,2,UI/UX|Python|Cybersecurity
+Tejaswini Gupta,tejaswini.gupta165@anits.edu.in,CSE,1-A,1,UI/UX|DevOps|Hackathons
+Priya Reddy,priya.reddy166@anits.edu.in,CSM,2-B,2,Python|Data Science|ML
+Amit Mishra,amit.mishra167@anits.edu.in,ECE,3-A,3,ML|Web Dev|IoT
+Aarav Das,aarav.das168@anits.edu.in,ECE,4-A,4,Design|Cloud|DevOps
+Meghana Reddy,meghana.reddy169@anits.edu.in,ECE,1-A,1,React|ML|Robotics
+Amit Yadav,amit.yadav170@anits.edu.in,MECH,1-A,1,Robotics|Docker|Cloud
+Karthik Joshi,karthik.joshi171@anits.edu.in,CSM,1-A,1,Hackathons|Python|AI
+Suresh Sharma,suresh.sharma172@anits.edu.in,ECE,3-B,3,Robotics|Web Dev|Data Science
+Ravi Chandra,ravi.chandra173@anits.edu.in,MECH,1-B,1,Hackathons|DevOps|Web Dev
+Vikram Singh,vikram.singh174@anits.edu.in,MECH,4-B,4,Cloud|UI/UX|AI
+Pooja Gupta,pooja.gupta175@anits.edu.in,CSM,1-B,1,Design|Cloud|Data Science
+Vikram Mishra,vikram.mishra176@anits.edu.in,CSE,1-B,1,React|Design|Cloud
+Ananya Mishra,ananya.mishra177@anits.edu.in,CSE,2-B,2,Python|AI|Data Science
+Siddharth Reddy,siddharth.reddy178@anits.edu.in,CSM,3-A,3,ML|DevOps|React
+Divya Rao,divya.rao179@anits.edu.in,CSE,4-B,4,Hackathons|Design|IoT
+Lavanya Naidu,lavanya.naidu180@anits.edu.in,CSM,4-B,4,IoT|Docker|Web Dev
+Vivaan Agarwal,vivaan.agarwal181@anits.edu.in,CSE,4-B,4,Web Dev|DevOps|Docker
+Tejaswini Patel,tejaswini.patel182@anits.edu.in,ECE,4-B,4,Robotics|ML|IoT
+Aditya Das,aditya.das183@anits.edu.in,ECE,3-B,3,Web Dev|DevOps|Cybersecurity
+Vivaan Das,vivaan.das184@anits.edu.in,MECH,4-B,4,Hackathons|ML|Python
+Varun Das,varun.das185@anits.edu.in,CSM,2-A,2,Data Science|ML|Web Dev
+Vivaan Kumar,vivaan.kumar186@anits.edu.in,CSE,1-B,1,UI/UX|Design|AI
+Vivaan Nair,vivaan.nair187@anits.edu.in,CSM,3-B,3,AI|Hackathons|ML
+Mounika Agarwal,mounika.agarwal188@anits.edu.in,CSE,3-A,3,React|Data Science|ML
+Kiran Naidu,kiran.naidu189@anits.edu.in,CSE,4-A,4,Hackathons|ML|Design
+Aarav Joshi,aarav.joshi190@anits.edu.in,ECE,4-A,4,Robotics|React|Python
+Mounika Singh,mounika.singh191@anits.edu.in,MECH,3-B,3,Design|Data Science|React
+Vikram Yadav,vikram.yadav192@anits.edu.in,ECE,4-A,4,Cloud|UI/UX|Robotics
+Sneha Yadav,sneha.yadav193@anits.edu.in,CSM,2-A,2,Cloud|Python|Design
+Amit Kumar,amit.kumar194@anits.edu.in,MECH,4-B,4,Robotics|AI|Docker
+Aarav Mishra,aarav.mishra195@anits.edu.in,CSM,4-B,4,React|Cybersecurity|Cloud
+Arjun Naidu,arjun.naidu196@anits.edu.in,CSM,2-B,2,ML|Docker|DevOps
+Meghana Singh,meghana.singh197@anits.edu.in,CSM,1-B,1,Hackathons|Design|AI
+Mounika Chandra,mounika.chandra198@anits.edu.in,ECE,4-A,4,UI/UX|AI|Python
+Ananya Nair,ananya.nair199@anits.edu.in,MECH,1-A,1,Docker|IoT|Design

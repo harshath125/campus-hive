@@ -138,7 +138,7 @@ function SpacePolls({ space }: { space: SpaceType }) {
                                             className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-xs text-white placeholder:text-slate-500 outline-none focus:border-amber-500/50 transition-all" />
                                         <div className="flex gap-2 flex-wrap">
                                             {poll.options.map(opt => (
-                                                <button key={opt.id} onClick={() => { if (reason.length >= 5) voteOnPoll(poll.id, opt.id); }}
+                                                <button key={opt.id} onClick={() => { if (reason.length >= 5) voteOnPoll(poll.id, opt.id, reason); }}
                                                     disabled={reason.length < 5}
                                                     className="flex-1 py-1.5 text-xs font-medium bg-amber-500/10 text-amber-400 rounded-lg hover:bg-amber-500/20 transition-all disabled:opacity-40 whitespace-nowrap">
                                                     Vote: {opt.label}

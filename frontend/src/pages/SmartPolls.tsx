@@ -140,7 +140,7 @@ export default function SmartPolls() {
                                                     </div>
                                                     <div className="flex flex-wrap gap-2">
                                                         {poll.options.map(opt => (
-                                                            <button key={opt.id} onClick={() => { if (reason.length >= 10) { voteOnPoll(poll.id, opt.id); setVotingPollId(null); setReason(""); } }}
+                                                            <button key={opt.id} onClick={() => { if (reason.length >= 10) { voteOnPoll(poll.id, opt.id, reason); setVotingPollId(null); setReason(""); } }}
                                                                 disabled={reason.length < 10}
                                                                 className="flex-1 py-2 text-sm font-medium bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl disabled:opacity-40 transition-all whitespace-nowrap px-2">
                                                                 Vote: {opt.label}

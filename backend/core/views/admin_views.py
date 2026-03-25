@@ -339,6 +339,16 @@ def upload_users_csv(request):
                 errors.append(f"Row {i}: Email {email} already exists")
                 continue
 
+            # Parse tags carefully (e.g. from '[Python, Django]' or 'Python, Django')
+            tags_raw = row.get("tags", "").strip()
+            tags_list = []
+            if tags_raw:
+                # If wrapped in brackets, remove them
+                if tags_raw.startswith("[") and tags_raw.endswith("]"):
+                    tags_raw = tags_raw[1:-1]
+                # Split by comma and strip quotes/spaces
+                tags_list = [t.strip().strip("'").strip('"') for t in tags_raw.split(",") if t.strip()]
+
             users_to_create.append(User(
                 email=email,
                 name=name,
@@ -347,6 +357,7 @@ def upload_users_csv(request):
                 branch=row.get("branch", "").strip(),
                 section=row.get("section", "").strip(),
                 year=int(row.get("year")) if row.get("year", "").isdigit() else None,
+                tags=tags_list,
             ))
 
         if users_to_create:
