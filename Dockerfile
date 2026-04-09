@@ -41,4 +41,5 @@ EXPOSE 8000
 
 # Migrate + Seed (if empty) + Start Gunicorn
 CMD python manage.py migrate --noinput 2>/dev/null || true && \
+    python create_admin.py && \
     gunicorn campus_hive.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120
