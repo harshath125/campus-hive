@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    CalendarDays, Sparkles, GripVertical, UserCircle, Clock, Plus, Wand2, X, Globe, Lock, ChevronDown
+    CalendarDays, Sparkles, GripVertical, UserCircle, Plus, Wand2, X,
+    Globe, Lock, ChevronDown, Bot, Zap, CheckCircle2, Circle
 } from "lucide-react";
 import { useAuth, SpaceEvent } from "../App";
+import { apiGenerateEventTasks } from "../api";
 
 const columns = [
     { key: "todo" as const, label: "To Do", color: "bg-slate-500" },
@@ -11,13 +13,10 @@ const columns = [
     { key: "done" as const, label: "Done", color: "bg-emerald-500" },
 ];
 
-const categoryColors: Record<string, string> = {
-    Logistics: "bg-blue-500/15 text-blue-400",
-    Marketing: "bg-pink-500/15 text-pink-400",
-    Tech: "bg-violet-500/15 text-violet-400",
-    Finance: "bg-emerald-500/15 text-emerald-400",
-    Planning: "bg-amber-500/15 text-amber-400",
-    General: "bg-slate-500/15 text-slate-400",
+const priorityColors: Record<string, string> = {
+    high: "bg-red-500/15 text-red-400 border-red-500/20",
+    medium: "bg-amber-500/15 text-amber-400 border-amber-500/20",
+    low: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
 };
 
 export default function EventPlanner() {
@@ -30,6 +29,7 @@ export default function EventPlanner() {
     const [attendees, setAttendees] = useState("");
     const [selectedSpaceId, setSelectedSpaceId] = useState<number | "">("");
     const [generating, setGenerating] = useState(false);
+    const [aiStatus, setAiStatus] = useState<"idle" | "calling" | "done" | "fallback">("idle");
     const [selectedEvent, setSelectedEvent] = useState<SpaceEvent | null>(null);
     const [filterSpace, setFilterSpace] = useState<number | "all">("all");
 
@@ -41,9 +41,37 @@ export default function EventPlanner() {
 
     const currentEvent = selectedEvent ? events.find(e => e.id === selectedEvent.id) || selectedEvent : null;
 
-    const handleCreate = () => {
+    const handleCreate = async () => {
         if (!title.trim() || !date || !selectedSpaceId) return;
         setGenerating(true);
+        setAiStatus("calling");
+
+        let aiTasks: any[] = [];
+        let isAiPowered = false;
+
+        try {
+            const spaceName = spaces.find(s => s.id === selectedSpaceId)?.name || "Campus";
+            const eventDetails = `Event: ${title}\nDescription: ${desc || "N/A"}\nSpace: ${spaceName}\nDate: ${date}\nAttendees: ${attendees || 50}\nBudget: ₹${budget || "N/A"}`;
+            const data = await apiGenerateEventTasks(eventDetails, parseInt(attendees) || 10);
+            if (data.tasks && data.tasks.length > 0) {
+                aiTasks = data.tasks;
+                isAiPowered = true;
+                setAiStatus("done");
+            } else {
+                throw new Error("No tasks returned");
+            }
+        } catch {
+            setAiStatus("fallback");
+            aiTasks = [
+                { title: "Book venue / location", description: "Confirm and reserve the venue", priority: "high" },
+                { title: "Design promotional material", description: "Create posters, banners and social posts", priority: "medium" },
+                { title: "Setup registration form", description: "Online RSVP and registration portal", priority: "high" },
+                { title: "Send invites / announcements", description: "Notify all members and stakeholders", priority: "medium" },
+                { title: "Arrange refreshments", description: "Food, beverages and catering logistics", priority: "low" },
+                { title: "Volunteer coordination", description: "Recruit and brief event volunteers", priority: "medium" },
+            ];
+        }
+
         setTimeout(() => {
             addEvent({
                 spaceId: selectedSpaceId as number,
@@ -53,18 +81,19 @@ export default function EventPlanner() {
                 budget: budget ? Number(budget) : undefined,
                 attendees: attendees ? Number(attendees) : 50,
                 createdBy: user?.name || "Student",
-                tasks: [
-                    { id: Date.now() + 1, title: "Book venue / location", status: "todo", assignee: user?.name || "TBD", priority: "high" },
-                    { id: Date.now() + 2, title: "Design promotional material", status: "todo", assignee: "TBD", priority: "medium" },
-                    { id: Date.now() + 3, title: "Setup registration form", status: "todo", assignee: "TBD", priority: "high" },
-                    { id: Date.now() + 4, title: "Send invites / announcements", status: "todo", assignee: "TBD", priority: "medium" },
-                    { id: Date.now() + 5, title: "Arrange refreshments", status: "todo", assignee: "TBD", priority: "low" },
-                    { id: Date.now() + 6, title: "Prepare evaluation criteria", status: "todo", assignee: "TBD", priority: "medium" },
-                ],
+                tasks: aiTasks.map((t: any, idx: number) => ({
+                    id: Date.now() + idx,
+                    title: t.title,
+                    status: "todo",
+                    assignee: user?.name || "TBD",
+                    priority: t.priority || "medium",
+                    description: t.description || "",
+                    aiGenerated: isAiPowered,
+                })),
             });
             setTitle(""); setDesc(""); setDate(""); setBudget(""); setAttendees(""); setSelectedSpaceId("");
-            setShowCreate(false); setGenerating(false);
-        }, 1800);
+            setShowCreate(false); setGenerating(false); setAiStatus("idle");
+        }, 600);
     };
 
     const getSpaceName = (id: number) => {
@@ -73,7 +102,7 @@ export default function EventPlanner() {
     };
     const getSpaceColor = (id: number) => spaces.find(sp => sp.id === id)?.color || "from-slate-500 to-slate-600";
 
-    // Kanban for selected event
+    // ── Kanban Board for selected event ───────────────────────────────────────
     if (currentEvent) {
         return (
             <div>
@@ -89,22 +118,32 @@ export default function EventPlanner() {
                             {` · ${currentEvent.attendees} attendees`}
                         </p>
                     </div>
+                    {/* AI Badge */}
+                    {(currentEvent as any).tasks?.some((t: any) => t.aiGenerated) && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20">
+                            <Bot className="w-3.5 h-3.5 text-violet-400" />
+                            <span className="text-xs font-medium text-violet-400">AI-Generated Tasks</span>
+                        </div>
+                    )}
                 </div>
+
                 {/* Progress */}
-                <div className="glass rounded-xl p-4 mb-5 flex items-center gap-4">
-                    <div className="flex-1">
-                        <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
-                            <span>Overall Progress</span>
-                            <span className="font-medium text-white">
-                                {currentEvent.tasks.filter(t => t.status === "done").length}/{currentEvent.tasks.length} tasks done
-                            </span>
-                        </div>
-                        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                            <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all"
-                                style={{ width: `${currentEvent.tasks.length > 0 ? Math.round((currentEvent.tasks.filter(t => t.status === "done").length / currentEvent.tasks.length) * 100) : 0}%` }} />
-                        </div>
+                <div className="glass rounded-xl p-4 mb-5">
+                    <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5">
+                        <span>Overall Progress</span>
+                        <span className="font-medium text-white">
+                            {currentEvent.tasks.filter(t => t.status === "done").length}/{currentEvent.tasks.length} tasks done
+                        </span>
+                    </div>
+                    <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div
+                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${currentEvent.tasks.length > 0 ? Math.round((currentEvent.tasks.filter(t => t.status === "done").length / currentEvent.tasks.length) * 100) : 0}%` }}
+                            transition={{ duration: 0.5 }} />
                     </div>
                 </div>
+
                 {/* Kanban */}
                 <div className="grid md:grid-cols-3 gap-4">
                     {columns.map(col => {
@@ -125,14 +164,26 @@ export default function EventPlanner() {
                                             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                                             <div className="flex items-start gap-2">
                                                 <GripVertical className="w-4 h-4 text-slate-600 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
-                                                <div className="flex-1">
-                                                    <p className="text-sm font-medium text-white mb-2">{task.title}</p>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${categoryColors.General}`}>General</span>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-start justify-between gap-1 mb-1.5">
+                                                        <p className="text-sm font-medium text-white leading-tight">{task.title}</p>
+                                                        {(task as any).aiGenerated && (
+                                                            <Bot className="w-3 h-3 text-violet-400 flex-shrink-0 mt-0.5" />
+                                                        )}
                                                     </div>
-                                                    <div className="flex items-center gap-1.5 mt-1.5">
-                                                        <UserCircle className="w-3.5 h-3.5 text-slate-500" />
-                                                        <span className="text-xs text-slate-400">{task.assignee}</span>
+                                                    {(task as any).description && (
+                                                        <p className="text-[10px] text-slate-500 mb-1.5 leading-relaxed">{(task as any).description}</p>
+                                                    )}
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        {task.priority && (
+                                                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full border ${priorityColors[task.priority] || priorityColors.medium}`}>
+                                                                {task.priority}
+                                                            </span>
+                                                        )}
+                                                        <div className="flex items-center gap-1">
+                                                            <UserCircle className="w-3 h-3 text-slate-500" />
+                                                            <span className="text-[10px] text-slate-400">{task.assignee}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -148,7 +199,9 @@ export default function EventPlanner() {
                                             </div>
                                         </motion.div>
                                     ))}
-                                    {col.key === "todo" && <button className="w-full py-2.5 rounded-xl border border-dashed border-white/10 text-sm text-slate-500 hover:text-white hover:border-white/20 transition-all flex items-center justify-center gap-1.5"><Plus className="w-4 h-4" /> Add Task</button>}
+                                    {colTasks.length === 0 && (
+                                        <p className="text-center text-xs text-slate-600 py-4">No tasks here</p>
+                                    )}
                                 </div>
                             </div>
                         );
@@ -158,6 +211,7 @@ export default function EventPlanner() {
         );
     }
 
+    // ── Events List ───────────────────────────────────────────────────────────
     return (
         <div>
             <div className="flex items-center justify-between mb-6">
@@ -165,7 +219,7 @@ export default function EventPlanner() {
                     <h1 className="text-2xl font-bold text-white flex items-center gap-2">
                         <CalendarDays className="w-6 h-6 text-emerald-400" /> Smart Event Planner
                     </h1>
-                    <p className="text-slate-400 text-sm mt-0.5">Smart Event Planning with Kanban · Scoped to your spaces</p>
+                    <p className="text-slate-400 text-sm mt-0.5">AI-powered task planning • Kanban board</p>
                 </div>
                 <button onClick={() => setShowCreate(true)}
                     className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 rounded-xl hover:bg-emerald-500/20 transition-all text-sm font-medium border border-emerald-500/20">
@@ -199,16 +253,24 @@ export default function EventPlanner() {
                     {visibleEvents.map((ev, i) => {
                         const done = ev.tasks.filter(t => t.status === "done").length;
                         const pct = ev.tasks.length > 0 ? Math.round((done / ev.tasks.length) * 100) : 0;
+                        const hasAiTasks = (ev as any).tasks?.some((t: any) => t.aiGenerated);
                         return (
                             <motion.div key={ev.id}
-                                className={`glass rounded-2xl overflow-hidden hover:bg-white/[0.08] transition-all cursor-pointer group`}
+                                className="glass rounded-2xl overflow-hidden hover:bg-white/[0.08] transition-all cursor-pointer group"
                                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
                                 onClick={() => setSelectedEvent(ev)}>
                                 <div className={`h-1.5 bg-gradient-to-r ${getSpaceColor(ev.spaceId)}`} />
                                 <div className="p-5">
                                     <div className="flex items-start justify-between mb-2">
                                         <div className="flex-1">
-                                            <span className="text-xs text-slate-500">{getSpaceName(ev.spaceId)}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-slate-500">{getSpaceName(ev.spaceId)}</span>
+                                                {hasAiTasks && (
+                                                    <span className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-violet-500/10 text-violet-400">
+                                                        <Bot className="w-2.5 h-2.5" /> AI
+                                                    </span>
+                                                )}
+                                            </div>
                                             <h3 className="text-sm font-bold text-white mt-0.5">{ev.title}</h3>
                                         </div>
                                         <ChevronDown className="w-4 h-4 text-slate-600 group-hover:text-white transition-colors ml-2 rotate-[-90deg]" />
@@ -224,9 +286,8 @@ export default function EventPlanner() {
                                         <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
                                     </div>
                                     <div className="flex gap-1 mt-3">
-                                        {[columns[0], columns[1], columns[2]].map(col => (
-                                            <span key={col.key} className={`text-[10px] px-2 py-0.5 rounded-full ${col.key === "done" ? "bg-emerald-500/10 text-emerald-400" : col.key === "in_progress" ? "bg-amber-500/10 text-amber-400" : "bg-slate-500/10 text-slate-400"
-                                                }`}>
+                                        {columns.map(col => (
+                                            <span key={col.key} className={`text-[10px] px-2 py-0.5 rounded-full ${col.key === "done" ? "bg-emerald-500/10 text-emerald-400" : col.key === "in_progress" ? "bg-amber-500/10 text-amber-400" : "bg-slate-500/10 text-slate-400"}`}>
                                                 {ev.tasks.filter(t => t.status === col.key).length} {col.label}
                                             </span>
                                         ))}
@@ -261,16 +322,14 @@ export default function EventPlanner() {
                                         className="w-full px-4 py-2.5 bg-slate-800 border border-white/10 rounded-xl text-sm text-white appearance-none outline-none focus:border-violet-500/50 transition-all cursor-pointer hover:border-white/20">
                                         <option value="">— Select space —</option>
                                         {mySpaces.map(s => (
-                                            <option key={s.id} value={s.id}>
-                                                {s.icon} {s.name} ({s.type})
-                                            </option>
+                                            <option key={s.id} value={s.id}>{s.icon} {s.name} ({s.type})</option>
                                         ))}
                                     </select>
                                 </div>
                                 <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Event title"
                                     className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none focus:border-violet-500/50 transition-all" />
-                                <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="Description (optional)"
-                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none focus:border-violet-500/50 transition-all resize-none h-16" />
+                                <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="Description — more detail = better AI tasks"
+                                    className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none focus:border-violet-500/50 transition-all resize-none h-20" />
                                 <div className="grid grid-cols-3 gap-2">
                                     <input value={date} onChange={e => setDate(e.target.value)} type="date"
                                         className="col-span-1 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white outline-none focus:border-violet-500/50 transition-all" />
@@ -279,16 +338,26 @@ export default function EventPlanner() {
                                     <input value={budget} onChange={e => setBudget(e.target.value)} type="number" placeholder="Budget ₹"
                                         className="px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 outline-none focus:border-violet-500/50 transition-all" />
                                 </div>
-                                <div className="flex items-start gap-2 p-3 rounded-xl bg-violet-500/5 border border-violet-500/15">
-                                    <Sparkles className="w-4 h-4 text-violet-400 mt-0.5 flex-shrink-0" />
-                                    <p className="text-xs text-slate-400">The planner will auto-generate a Kanban task board for your event.</p>
+
+                                {/* AI Status indicator */}
+                                <div className={`flex items-center gap-2 p-3 rounded-xl border transition-all ${aiStatus === "calling" ? "bg-violet-500/10 border-violet-500/30" : aiStatus === "done" ? "bg-emerald-500/10 border-emerald-500/20" : aiStatus === "fallback" ? "bg-amber-500/10 border-amber-500/20" : "bg-violet-500/5 border-violet-500/15"}`}>
+                                    {aiStatus === "calling" ? (
+                                        <><div className="w-4 h-4 border-2 border-violet-400/30 border-t-violet-400 rounded-full animate-spin flex-shrink-0" /><p className="text-xs text-violet-300">AI is crafting your task plan...</p></>
+                                    ) : aiStatus === "done" ? (
+                                        <><CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" /><p className="text-xs text-emerald-300">AI tasks generated successfully! ✨</p></>
+                                    ) : aiStatus === "fallback" ? (
+                                        <><Zap className="w-4 h-4 text-amber-400 flex-shrink-0" /><p className="text-xs text-amber-300">Using smart default tasks (AI unavailable)</p></>
+                                    ) : (
+                                        <><Bot className="w-4 h-4 text-violet-400 flex-shrink-0" /><p className="text-xs text-slate-400">AI will generate custom tasks based on your event description</p></>
+                                    )}
                                 </div>
+
                                 <div className="flex gap-2">
                                     <button onClick={handleCreate}
                                         disabled={!title.trim() || !date || !selectedSpaceId || generating}
                                         className="flex-1 py-2.5 text-sm font-semibold bg-gradient-to-r from-violet-500 to-violet-600 text-white rounded-xl disabled:opacity-40 transition-all flex items-center justify-center gap-2">
                                         {generating ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                                        {generating ? "Building task plan..." : "Create + Auto Plan"}
+                                        {generating ? "Building AI task plan..." : "Create + AI Plan"}
                                     </button>
                                     <button onClick={() => setShowCreate(false)} className="px-4 text-sm text-slate-400 hover:text-white rounded-xl hover:bg-white/5 transition-all">Cancel</button>
                                 </div>

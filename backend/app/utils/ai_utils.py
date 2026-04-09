@@ -1,5 +1,5 @@
 """
-Gemini AI utilities for Campus Hive.
+AI utilities for Campus Hive.
 Integrates with google-generativeai library.
 """
 import json
@@ -8,15 +8,15 @@ from typing import List, Optional
 
 try:
     import google.generativeai as genai
-    GEMINI_AVAILABLE = True
+    AI_AVAILABLE = True
 except ImportError:
-    GEMINI_AVAILABLE = False
+    AI_AVAILABLE = False
 
 
 def _get_model():
-    """Lazily configure and return the Gemini Pro model."""
+    """Lazily configure and return the AI Pro model."""
     api_key = os.getenv("GEMINI_API_KEY", "")
-    if not GEMINI_AVAILABLE or not api_key:
+    if not AI_AVAILABLE or not api_key:
         return None
     genai.configure(api_key=api_key)
     return genai.GenerativeModel("gemini-pro")
@@ -24,7 +24,7 @@ def _get_model():
 
 def summarize_poll_reasons(reasons: List[str]) -> Optional[str]:
     """
-    Summarize poll voting reasons into 3 key insights using Gemini.
+    Summarize poll voting reasons into 3 key insights using AI.
     Falls back to None if API is unavailable.
     """
     model = _get_model()
@@ -46,13 +46,13 @@ Format:
         response = model.generate_content(prompt)
         return response.text.strip()
     except Exception as e:
-        print(f"[Gemini] summarize_poll_reasons error: {e}")
+        print(f"[AI] summarize_poll_reasons error: {e}")
         return None
 
 
 def generate_event_tasks(event_details: str, member_count: int) -> List[dict]:
     """
-    Generate a Kanban task list for an event using Gemini.
+    Generate a Kanban task list for an event using AI.
     Falls back to sensible defaults if API is unavailable.
     """
     default_tasks = [
@@ -91,5 +91,5 @@ No extra text, just the JSON array."""
         text = text.strip().rstrip("```")
         return json.loads(text)
     except Exception as e:
-        print(f"[Gemini] generate_event_tasks error: {e}")
+        print(f"[AI] generate_event_tasks error: {e}")
         return default_tasks

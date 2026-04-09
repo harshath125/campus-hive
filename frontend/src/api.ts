@@ -203,6 +203,24 @@ export async function apiUpdateTags(tags: string[]) {
   });
 }
 
+export async function apiSendVibeRequest(targetUserId: number, score: number, message?: string) {
+  return apiFetch("/vibe/request", {
+    method: "POST",
+    body: JSON.stringify({ target_user_id: targetUserId, score, message: message || "" }),
+  });
+}
+
+export async function apiGetVibeRequests() {
+  return apiFetch("/vibe/requests");
+}
+
+export async function apiRespondVibeRequest(requestId: number, action: "accept" | "decline") {
+  return apiFetch(`/vibe/requests/${requestId}/respond`, {
+    method: "POST",
+    body: JSON.stringify({ action }),
+  });
+}
+
 // ── Incidents ───────────────────────────────────────────────────────────────
 
 export async function apiReportIncident(data: Record<string, any>) {
@@ -328,5 +346,21 @@ export async function apiAdminCreatePoll(data: Record<string, any>) {
   return apiFetch("/admin-api/create-poll", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+// ── AI Endpoints ─────────────────────────────────────────────────────────────
+
+export async function apiGenerateEventTasks(eventDetails: string, memberCount?: number) {
+  return apiFetch("/ai/generate-tasks", {
+    method: "POST",
+    body: JSON.stringify({ event_details: eventDetails, member_count: memberCount || 5 }),
+  });
+}
+
+export async function apiPollInsight(question: string, reasons?: string[]) {
+  return apiFetch("/ai/poll-insight", {
+    method: "POST",
+    body: JSON.stringify({ question, reasons: reasons || [] }),
   });
 }

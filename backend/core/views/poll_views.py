@@ -1,6 +1,6 @@
 """
 Polls Views – /api/polls/
-Smart polls with AI-powered consensus summary via Gemini.
+Smart polls with AI-powered consensus summary via AI.
 """
 import json
 from django.http import JsonResponse
@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from core.models import Poll, PollOption, Vote, Group, ActivityLog
-from core.utils.gemini_utils import summarize_poll_reasons
+from core.utils.ai_utils import summarize_poll_reasons
 from core.views.auth_views import _get_user_from_token, _get_client_ip
 
 
@@ -76,7 +76,7 @@ def create_poll(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def vote_on_poll(request, poll_id):
-    """Cast a vote with a reason. Triggers Gemini AI insight after 3+ votes."""
+    """Cast a vote with a reason. Triggers AI insight after 3+ votes."""
     user = _get_user_from_token(request)
     if not user:
         return JsonResponse({"error": "Authorization token is missing or invalid"}, status=401)

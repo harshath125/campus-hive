@@ -26,7 +26,7 @@
 | **Frontend** | React 18 + TypeScript + Tailwind CSS + Framer Motion |
 | **Backend** | Django 5 + Django REST Framework |
 | **Database** | Supabase (PostgreSQL) with SQLite fallback |
-| **AI/ML** | Google Gemini API (insights) + TF-IDF Cosine Similarity (matching) |
+| **AI/ML** | Google AI API (insights) + TF-IDF Cosine Similarity (matching) |
 | **Auth** | JWT (SimpleJWT) |
 | **Deployment** | Docker + Nginx + Gunicorn |
 
@@ -48,7 +48,7 @@ campus-hive/
 │   ├── core/
 │   │   ├── models.py    # User, ActivityLog, Announcement, Resource, Incident
 │   │   ├── views/       # auth, admin, vibe, group, safety, resource views
-│   │   └── utils/       # vibe_algorithm.py (ML matching), gemini_utils.py (AI)
+│   │   └── utils/       # vibe_algorithm.py (ML matching), ai_utils.py (AI)
 │   ├── campus_hive/     # Django settings, URLs, WSGI
 │   ├── Dockerfile       # Python + Gunicorn production server
 │   └── .env             # Environment variables (DB, API keys)
@@ -101,7 +101,7 @@ The vibe matcher uses a **multi-factor weighted scoring** system:
 | Section Match | 10% | Same section = 100%, different = 0% |
 | Shared Tag Count | 10% | 4+ shared tags = max bonus |
 
-The algorithm processes TF-IDF vectors for **all users at once** for efficiency, then ranks the top 10 matches with AI-generated insights from Google Gemini.
+The algorithm processes TF-IDF vectors for **all users at once** for efficiency, then ranks the top 10 matches with AI-generated insights from Google AI.
 
 ---
 

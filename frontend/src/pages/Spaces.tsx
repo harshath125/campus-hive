@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Globe, Lock, Users, Plus, Search, BarChart3, CalendarDays, X,
@@ -6,6 +6,7 @@ import {
     Shield, ArrowLeft, Send, Bot, ThumbsUp, MessageSquare, Wand2, Sparkles, Bell
 } from "lucide-react";
 import { useAuth, SpaceType, SpacePoll, SpaceEvent } from "../App";
+import { apiGetGroupMembers } from "../api";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -348,7 +349,7 @@ function SpaceEvents({ space }: { space: SpaceType }) {
 
 function SpaceDetail({ space, onClose }: { space: SpaceType; onClose: () => void }) {
     const { user, joinedSpaces, pendingRequests, joinSpace, requestJoin, leaveSpace, polls, events, spaceRequests, approveRequest } = useAuth();
-    const [activeTab, setActiveTab] = useState<"about" | "polls" | "events" | "requests">("about");
+    const [activeTab, setActiveTab] = useState<"about" | "polls" | "events" | "requests" | "members">("about");
 
     const isMember = joinedSpaces.includes(space.id);
     const isPending = pendingRequests.includes(space.id);
@@ -356,25 +357,42 @@ function SpaceDetail({ space, onClose }: { space: SpaceType; onClose: () => void
     const spacePolls = polls.filter(p => p.spaceId === space.id);
     const spaceEvents = events.filter(e => e.spaceId === space.id);
     const requests = spaceRequests[space.id] || [];
+    const [members, setMembers] = useState<any[]>([]);
+    const [loadingMembers, setLoadingMembers] = useState(false);
+    const [showNotification, setShowNotification] = useState(false);
+
+    useEffect(() => {
+        if (isMember && space.id) {
+            setLoadingMembers(true);
+            apiGetGroupMembers(space.id).then(data => {
+                setMembers((data.members || []).filter((m: any) => m.status === "approved"));
+            }).catch(() => {}).finally(() => setLoadingMembers(false));
+        }
+    }, [isMember, space.id]);
 
     const handleJoinAction = () => {
         if (isMember) { leaveSpace(space.id); return; }
         if (space.type === "Public") { joinSpace(space.id); }
-        else if (space.type === "Private" && !isPending) { requestJoin(space.id); }
+        else if (space.type === "Private" && !isPending) { 
+            requestJoin(space.id); 
+            setShowNotification(true);
+            setTimeout(() => setShowNotification(false), 3000);
+        }
     };
 
     const tabs = [
         { key: "about" as const, label: "About" },
+        { key: "members" as const, label: `Members`, show: isMember },
         { key: "polls" as const, label: `Polls (${spacePolls.length})`, show: isMember },
         { key: "events" as const, label: `Events (${spaceEvents.length})`, show: isMember },
         ...(isAdmin && requests.length > 0 ? [{ key: "requests" as const, label: `Requests (${requests.length})`, show: true }] : []),
     ].filter(t => t.show !== false);
 
     return (
-        <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-            <motion.div className="relative w-full max-w-2xl max-h-[90vh] glass-strong rounded-2xl overflow-hidden flex flex-col"
+            <motion.div className="relative w-full max-w-5xl h-[95vh] glass-strong rounded-2xl overflow-hidden flex flex-col"
                 initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}>
                 {/* Header */}
                 <div className={`h-28 bg-gradient-to-br ${space.color} relative flex-shrink-0`}>
@@ -402,7 +420,7 @@ function SpaceDetail({ space, onClose }: { space: SpaceType; onClose: () => void
                 </div>
 
                 {/* Actions bar */}
-                <div className="px-5 py-3 flex items-center justify-between border-b border-white/5 flex-shrink-0">
+                <div className="px-5 py-3 flex items-center justify-between border-b border-white/5 flex-shrink-0 relative">
                     <div className="flex gap-1">
                         {tabs.map(t => (
                             <button key={t.key} onClick={() => setActiveTab(t.key)}
@@ -411,10 +429,19 @@ function SpaceDetail({ space, onClose }: { space: SpaceType; onClose: () => void
                             </button>
                         ))}
                     </div>
+                    {/* Notification Toast */}
+                    <AnimatePresence>
+                        {showNotification && (
+                            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }}
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold whitespace-nowrap shadow-xl">
+                                Request sent to Space Creator!
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                     {/* Join / Request / Leave button */}
                     {space.type !== "Mandatory" && (
                         <button onClick={handleJoinAction}
-                            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${isMember
+                            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all z-10 ${isMember
                                 ? "bg-white/5 text-slate-400 hover:bg-red-500/10 hover:text-red-400"
                                 : isPending
                                     ? "bg-amber-500/10 text-amber-400 cursor-default"
@@ -464,6 +491,34 @@ function SpaceDetail({ space, onClose }: { space: SpaceType; onClose: () => void
                     )}
                     {activeTab === "polls" && isMember && <SpacePolls space={space} />}
                     {activeTab === "events" && isMember && <SpaceEvents space={space} />}
+                    {activeTab === "members" && isMember && (
+                        <div>
+                            <p className="text-xs text-slate-500 mb-3">Members of {space.name}</p>
+                            {loadingMembers ? (
+                                <div className="text-center py-8"><div className="w-6 h-6 border-2 border-violet-400/30 border-t-violet-400 rounded-full animate-spin mx-auto" /></div>
+                            ) : members.length === 0 ? (
+                                <p className="text-sm text-slate-500 text-center py-8">No members yet</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {members.map((m: any) => (
+                                        <div key={m.id} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500/30 to-amber-500/30 flex items-center justify-center text-base">{m.user_avatar || '👤'}</div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-white">{m.user_name}</p>
+                                                    <p className="text-[10px] text-slate-500">Joined {new Date(m.joined_at).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {m.role === 'admin' && <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300"><Crown className="w-2.5 h-2.5" /> Admin</span>}
+                                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">Member</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
                     {activeTab === "requests" && isAdmin && (
                         <div>
                             <p className="text-xs text-slate-500 mb-3">Pending join requests for {space.name}</p>

@@ -15,6 +15,7 @@ import EventPlanner from "./pages/EventPlanner";
 import Safety from "./pages/Safety";
 import Spaces from "./pages/Spaces";
 import Resources from "./pages/Resources";
+import ConnectionPool from "./pages/ConnectionPool";
 import AdminLogin from "./pages/AdminLogin";
 import AdminPanel from "./pages/AdminPanel";
 
@@ -458,6 +459,7 @@ export default function App() {
                         <Route path="safety" element={<Safety />} />
                         <Route path="spaces" element={<Spaces />} />
                         <Route path="resources" element={<Resources />} />
+                        <Route path="connections" element={<ConnectionPool />} />
                     </Route>
                 </Routes>
             </Router>

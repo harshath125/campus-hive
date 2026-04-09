@@ -39,6 +39,9 @@ urlpatterns = [
     path("vibe/matches", vibe_views.get_vibe_matches),
     path("vibe/score", vibe_views.get_vibe_score),
     path("vibe/tags", vibe_views.update_tags),
+    path("vibe/request", vibe_views.send_vibe_request),
+    path("vibe/requests", vibe_views.get_vibe_requests),
+    path("vibe/requests/<int:request_id>/respond", vibe_views.respond_vibe_request),
 
     # ── Incidents ────────────────────────────────────────────────────────
     path("incidents/report", incident_views.report_incident),
@@ -64,5 +67,9 @@ urlpatterns = [
     path("admin-api/create-event", admin_views.admin_create_event),
     path("admin-api/create-group", admin_views.admin_create_group),
     path("admin-api/create-poll", admin_views.admin_create_poll),
+
+    # ── AI Endpoints ────────────────────────────────────────────────────
+    path("ai/generate-tasks", vibe_views.ai_generate_tasks),
+    path("ai/poll-insight", vibe_views.ai_poll_insight),
 ]
 

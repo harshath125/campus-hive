@@ -1,31 +1,32 @@
 version: "3.9"
 
 services:
-  backend:
-    build: ./backend
-    container_name: campushive-backend
+  campus-hive:
+    build: .
     ports:
       - "8000:8000"
-    env_file:
-      - ./backend/.env
+    volumes:
+      - db_data:/app/backend/db.sqlite3
+      - static_files:/app/backend/staticfiles
     environment:
       - DJANGO_SETTINGS_MODULE=campus_hive.settings
       - DJANGO_DEBUG=False
-    volumes:
-      - backend-data:/app/db.sqlite3
+      - SECRET_KEY=${SECRET_KEY:-campus-hive-super-secret-jwt-key-2024-change-in-prod}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - CORS_ORIGINS=http://localhost:8000,http://localhost:5173
     restart: unless-stopped
-    command: >
-      sh -c "python manage.py migrate --noinput 2>/dev/null || true &&
-             gunicorn campus_hive.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120"
 
-  frontend:
-    build: ./frontend
-    container_name: campushive-frontend
+  nginx:
+    image: nginx:alpine
     ports:
       - "80:80"
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - backend
+      - campus-hive
     restart: unless-stopped
 
 volumes:
-  backend-data:
+  db_data:
+  static_files:

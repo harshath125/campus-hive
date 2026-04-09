@@ -28,8 +28,8 @@ class Config:
     JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
     JWT_ACCESS_TOKEN_EXPIRES_HOURS = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES_HOURS", "24"))
 
-    # Gemini AI
-    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+    # AI
+    AI_API_KEY = os.getenv("AI_API_KEY", "")
 
     # CORS
     CORS_ORIGINS = [

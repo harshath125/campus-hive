@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from core.models import Event, EventTask, Group, TaskStatusChoice, PriorityChoice, ActivityLog
-from core.utils.gemini_utils import generate_event_tasks
+from core.utils.ai_utils import generate_event_tasks
 from core.views.auth_views import _get_user_from_token, _get_client_ip
 
 
@@ -56,7 +56,7 @@ def create_event(request):
         created_by=user,
     )
 
-    # Auto-generate tasks from Gemini
+    # Auto-generate tasks from AI
     tasks_created = []
     if data.get("generate_tasks", False):
         event_details = f"Event: {event.title}\nDescription: {event.description or 'N/A'}\nBudget: {event.budget or 'N/A'}"

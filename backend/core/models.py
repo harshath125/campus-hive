@@ -464,3 +464,55 @@ class Resource(models.Model):
             "created_by": self.created_by.name if self.created_by else "Admin",
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
+
+
+# ─── Vibe Request Model ──────────────────────────────────────────────────────
+
+class VibeRequest(models.Model):
+    """Tracks vibe match connection requests between students."""
+
+    class StatusChoice(models.TextChoices):
+        PENDING = "pending", "Pending"
+        ACCEPTED = "accepted", "Accepted"
+        DECLINED = "declined", "Declined"
+
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="vibe_requests_sent")
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="vibe_requests_received")
+    status = models.CharField(max_length=20, choices=StatusChoice.choices, default=StatusChoice.PENDING)
+    message = models.CharField(max_length=255, blank=True, default="")
+    score = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "ch_vibe_requests"
+        unique_together = ("from_user", "to_user")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.from_user.name} → {self.to_user.name} ({self.status})"
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "from_user": {
+                "id": self.from_user.id,
+                "name": self.from_user.name,
+                "avatar": self.from_user.avatar,
+                "email": self.from_user.email,
+                "branch": self.from_user.branch,
+                "tags": self.from_user.tags or [],
+            },
+            "to_user": {
+                "id": self.to_user.id,
+                "name": self.to_user.name,
+                "avatar": self.to_user.avatar,
+                "email": self.to_user.email,
+                "branch": self.to_user.branch,
+                "tags": self.to_user.tags or [],
+            },
+            "status": self.status,
+            "message": self.message,
+            "score": self.score,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }

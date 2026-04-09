@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Hexagon, Users, BarChart3, CalendarDays, Shield, Globe,
     LogOut, ChevronRight, Bell, Search, BookOpen, X,
-    User, Edit2, Check, Tag, MapPin, GraduationCap
+    User, Edit2, Check, Tag, MapPin, GraduationCap, Heart, UserPlus
 } from "lucide-react";
 import { useAuth } from "../App";
-import { apiUpdateProfile } from "../api";
+import { apiUpdateProfile, apiGetVibeRequests, apiRespondVibeRequest } from "../api";
 
 const navItems = [
     { to: "/dashboard/vibe-matcher", icon: Users, label: "Vibe Matcher", color: "text-violet-400" },
+    { to: "/dashboard/connections", icon: Heart, label: "Connection Pool", color: "text-rose-400" },
     { to: "/dashboard/polls", icon: BarChart3, label: "Smart Polls", color: "text-amber-400" },
     { to: "/dashboard/events", icon: CalendarDays, label: "Event Planner", color: "text-emerald-400" },
     { to: "/dashboard/safety", icon: Shield, label: "Safety Shield", color: "text-red-400" },
@@ -29,6 +30,24 @@ export default function Dashboard() {
     const [editedUser, setEditedUser] = useState(user);
     const [tagInput, setTagInput] = useState("");
     const [showNotifications, setShowNotifications] = useState(false);
+    const [vibeRequests, setVibeRequests] = useState<any[]>([]);
+    const [pendingVibeCount, setPendingVibeCount] = useState(0);
+
+    useEffect(() => {
+        apiGetVibeRequests().then(data => {
+            const pending = (data.incoming || []).filter((r: any) => r.status === "pending");
+            setVibeRequests(pending);
+            setPendingVibeCount(pending.length);
+        }).catch(() => {});
+    }, []);
+
+    const handleVibeRespond = async (id: number, action: "accept" | "decline") => {
+        try {
+            await apiRespondVibeRequest(id, action);
+            setVibeRequests(prev => prev.filter(r => r.id !== id));
+            setPendingVibeCount(prev => Math.max(0, prev - 1));
+        } catch {}
+    };
 
     const handleLogout = () => { logout(); navigate("/"); };
 
@@ -142,7 +161,11 @@ export default function Dashboard() {
                         {/* Bell */}
                         <button onClick={() => setShowNotifications(!showNotifications)} className="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/5 transition-colors">
                             <Bell className="w-4.5 h-4.5 text-slate-400" />
-                            {announcements.length > 0 && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-amber-500 rounded-full" />}
+                            {(announcements.length > 0 || pendingVibeCount > 0) && (
+                                <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-violet-500 rounded-full flex items-center justify-center text-[9px] font-bold text-white">
+                                    {pendingVibeCount + announcements.length}
+                                </span>
+                            )}
                         </button>
                         
                         {/* Notifications Dropdown */}
@@ -150,10 +173,29 @@ export default function Dashboard() {
                             {showNotifications && (
                                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute top-16 right-4 w-80 bg-[#0F172A] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
                                     <div className="p-4 border-b border-white/5 bg-white/5">
-                                        <h3 className="text-sm font-bold text-white">Notifications &amp; Announcements</h3>
+                                        <h3 className="text-sm font-bold text-white">Notifications</h3>
                                     </div>
                                     <div className="max-h-96 overflow-y-auto w-full p-2 space-y-2">
-                                        {announcements.length === 0 && <p className="text-xs text-slate-500 text-center py-4">No recent announcements.</p>}
+                                        {/* Vibe Requests */}
+                                        {vibeRequests.map((req: any) => (
+                                            <div key={`vibe-${req.id}`} className="p-3 rounded-xl bg-violet-500/5 border border-violet-500/10">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <UserPlus className="w-3.5 h-3.5 text-violet-400" />
+                                                    <span className="text-xs font-semibold text-violet-300">Vibe Match Request</span>
+                                                </div>
+                                                <p className="text-sm text-white mb-1">{req.from_user.avatar} <strong>{req.from_user.name}</strong> wants to connect</p>
+                                                <p className="text-[10px] text-slate-500 mb-2">Score: {req.score}% • {req.from_user.branch}</p>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => handleVibeRespond(req.id, 'accept')} className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-medium hover:bg-emerald-500/20">
+                                                        <Check className="w-2.5 h-2.5" /> Accept
+                                                    </button>
+                                                    <button onClick={() => handleVibeRespond(req.id, 'decline')} className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-500/10 text-red-400 text-[10px] font-medium hover:bg-red-500/20">
+                                                        <X className="w-2.5 h-2.5" /> Decline
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {/* Announcements */}
                                         {announcements.map((a: any, idx) => (
                                             <div key={a.id || idx} className="p-3 rounded-xl bg-white/5 border border-white/5">
                                                 <h4 className="text-sm font-bold text-amber-400 mb-1">{a.title}</h4>
@@ -161,6 +203,7 @@ export default function Dashboard() {
                                                 {a.created_at && <p className="text-[10px] text-slate-500 mt-2">{new Date(a.created_at).toLocaleString()}</p>}
                                             </div>
                                         ))}
+                                        {announcements.length === 0 && vibeRequests.length === 0 && <p className="text-xs text-slate-500 text-center py-4">No notifications.</p>}
                                     </div>
                                 </motion.div>
                             )}

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""ML-only accuracy results - no Gemini imports"""
+"""ML-only accuracy results - no AI imports"""
 import os, sys, django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "campus_hive.settings")
 django.setup()

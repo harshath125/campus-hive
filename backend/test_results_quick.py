@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Quick ML accuracy results + Gemini test"""
+"""Quick ML accuracy results + AI test"""
 import os, sys, django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "campus_hive.settings")
 django.setup()
@@ -100,13 +100,13 @@ for i, m in enumerate(data2.get("matches", [])[:5]):
         u.get("branch", ""), u.get("year", ""),
         m.get("common_tags", [])))
 
-# Gemini AI test
+# AI test
 print()
 print("=" * 70)
-print("GEMINI AI TEST")
+print("AI TEST")
 print("=" * 70)
 from core.models import Poll, Vote
-from core.utils.gemini_utils import generate_poll_summary, generate_event_tasks
+from core.utils.ai_utils import generate_poll_summary, generate_event_tasks
 
 poll = Poll.objects.first()
 if poll:

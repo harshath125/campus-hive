@@ -1,7 +1,7 @@
 """
-Campus Hive - ML Accuracy + Gemini AI Feature Test
+Campus Hive - ML Accuracy + AI Feature Test
 Validates vibe matcher accuracy with 50 users across 9 clusters.
-Tests Gemini AI poll summarization and event task generation.
+Tests AI poll summarization and event task generation.
 """
 import os, sys, django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "campus_hive.settings")
@@ -117,10 +117,10 @@ print(f"Average in/out separation: {avg_sep:+.1f} percentage points")
 
 # ============================================================
 print("\n\n" + "=" * 60)
-print("GEMINI AI — POLL SUMMARIZATION TEST")
+print("AI — POLL SUMMARIZATION TEST")
 print("=" * 60)
 from core.models import Poll, Vote
-from core.utils.gemini_utils import generate_poll_summary
+from core.utils.ai_utils import generate_poll_summary
 
 poll = Poll.objects.first()
 if poll:
@@ -139,9 +139,9 @@ if poll:
 
 # ============================================================
 print("\n\n" + "=" * 60)
-print("GEMINI AI — EVENT TASK GENERATION TEST")
+print("AI — EVENT TASK GENERATION TEST")
 print("=" * 60)
-from core.utils.gemini_utils import generate_event_tasks
+from core.utils.ai_utils import generate_event_tasks
 try:
     tasks = generate_event_tasks("Annual Tech Fest 2026", "3-day tech festival with workshops, hackathon, guest lectures, and prize pool of 2 lakhs", 200000)
     print(f"Generated {len(tasks)} tasks:")

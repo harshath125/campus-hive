@@ -51,7 +51,7 @@ campus-hive/
 │   │   │   ├── vibe.py          ← /api/vibe/* (Jaccard matching)
 │   │   │   └── incidents.py     ← /api/incidents/* (anonymous)
 │   │   └── utils/
-│   │       ├── gemini_utils.py  ← Gemini AI integration
+│   │       ├── ai_utils.py  ← AI integration
 │   │       └── vibe_logic.py    ← Jaccard similarity math
 │   ├── run.py                   ← Entry point
 │   ├── requirements.txt
@@ -72,7 +72,7 @@ campus-hive/
 | Auth | **Flask-JWT-Extended 4.6** (HS256 JWT) |
 | Passwords | **Flask-Bcrypt** (bcrypt hashing) |
 | CORS | **Flask-CORS** |
-| AI | **Google Gemini Pro** (`google-generativeai`) |
+| AI | **Google AI Pro** (`google-generativeai`) |
 | Deployment | **Gunicorn + Docker** |
 
 ---
@@ -85,7 +85,7 @@ The `.env` file in `backend/` already contains your credentials:
 DATABASE_URL=postgresql://postgres:9wZIiXmi9XzvmAKt@db.boxpatdnkenkbfpnffqk.supabase.co:5432/postgres
 SECRET_KEY=campus-hive-super-secret-jwt-key-2024-change-in-prod
 JWT_ACCESS_TOKEN_EXPIRES_HOURS=24
-GEMINI_API_KEY=AIzaSyAC3BI2WFqTFUmtBoaNR4ogy-d4OVH4o2c
+AI_API_KEY=AIzaSyAC3BI2WFqTFUmtBoaNR4ogy-d4OVH4o2c
 FLASK_ENV=development
 FLASK_DEBUG=True
 FLASK_PORT=5000
@@ -414,7 +414,7 @@ git push -u origin main
 | `DATABASE_URL` | *(set)* | Supabase PostgreSQL URL |
 | `SECRET_KEY` | *(set)* | JWT signing key |
 | `JWT_ACCESS_TOKEN_EXPIRES_HOURS` | `24` | Token lifetime |
-| `GEMINI_API_KEY` | *(set)* | Google Gemini API key |
+| `AI_API_KEY` | *(set)* | Google AI API key |
 | `FLASK_ENV` | `development` | `development` or `production` |
 | `FLASK_DEBUG` | `True` | Enable Flask debug mode |
 | `FLASK_PORT` | `5000` | Port to run on |
@@ -435,4 +435,4 @@ git push -u origin main
 
 ---
 
-*🐝 Built with Flask + Supabase + Flask-JWT-Extended + Gemini AI*
+*🐝 Built with Flask + Supabase + Flask-JWT-Extended + AI*

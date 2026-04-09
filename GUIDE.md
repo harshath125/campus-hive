@@ -1,346 +1,664 @@
-# Campus Hive v2.0 — Complete Admin & Deployment Guide
+# 🐝 Campus Hive — Complete Guide
+
+> Step-by-step guide for setup, features, database, deployment, and maintenance.
 
 ---
 
-## 1. How to Run the Project (Local)
+## 📋 Table of Contents
 
-### Quick Start (3 commands)
-```batch
-batch\setup_backend.bat     :: Install Python deps, migrate DB, create admin user
-batch\setup_frontend.bat    :: Install npm packages
-batch\start_all.bat         :: Launch Django (port 8000) + Vite (port 5173)
+1. [Quick Start (Local)](#1-quick-start-local)
+2. [Project Structure](#2-project-structure)
+3. [All Features](#3-all-features)
+4. [Database & Data Viewing](#4-database--data-viewing)
+5. [Authentication](#5-authentication)
+6. [AI Features (AI)](#6-ai-features-ai)
+7. [Docker Deployment](#7-docker-deployment)
+8. [AWS EC2 Deployment (Free Tier)](#8-aws-ec2-deployment-free-tier)
+9. [Admin Panel](#9-admin-panel)
+10. [API Reference](#10-api-reference)
+11. [Troubleshooting](#11-troubleshooting)
+
+---
+
+## 1. Quick Start (Local)
+
+### What You Need
+
+- Python 3.10+ → [python.org](https://python.org)
+- Node.js 18+ → [nodejs.org](https://nodejs.org)
+- DB Browser for SQLite → [sqlitebrowser.org](https://sqlitebrowser.org) (to view data)
+
+### Backend Setup
+
+```powershell
+cd campus-hive\backend
+
+# Create virtual environment (first time only)
+python -m venv venv
+
+# Activate it
+.\venv\Scripts\activate
+
+# Install packages
+pip install -r requirements.txt
+
+# Run database migrations
+python manage.py migrate
+
+# Create admin user (first time only)
+python manage.py createsuperuser
+
+# Seed sample data (optional)
+python seed_data.py
+
+# Start backend
+python manage.py runserver 8000
 ```
 
-### Manual Start
-```powershell
-# Terminal 1 — Backend
-cd campus-hive\backend
-venv\Scripts\activate
-python manage.py runserver 8000
+**Backend runs at:** http://localhost:8000
+**Admin panel at:** http://localhost:8000/admin
 
-# Terminal 2 — Frontend
+### Frontend Setup
+
+```powershell
 cd campus-hive\frontend
+
+# Install packages
+npm install
+
+# Start dev server
 npm run dev
 ```
 
-### URLs
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:5173 |
-| Django Admin | http://localhost:8000/admin/ |
-| API Root | http://localhost:8000/api/ |
+**Frontend runs at:** http://localhost:5173
+
+### Both Running Together
+
+Open 2 terminals. Terminal 1 runs backend, Terminal 2 runs frontend. That's it!
 
 ---
 
-## 2. Django Admin Panel Guide
+## 2. Project Structure
 
-### Login
-1. Go to `http://localhost:8000/admin/`
-2. Enter your superuser email and password
-3. (Default: `admin@campushive.com` / `admin123`)
-
-### What You Can Manage
-
-| Section | What It Shows | Actions |
-|---------|--------------|---------|
-| **Users** | All students, faculty, admins | View/edit/deactivate, filter by role/branch/year/section |
-| **Groups** | Spaces (clubs, departments) | Create/edit, see member counts, admin info |
-| **Polls** | All created polls | View questions, options, AI insights |
-| **Poll Options** | Individual poll choices | See vote counts |
-| **Votes** | Every vote cast | See who voted, their reason, timestamp |
-| **Events** | All events | View details, budget, associated group |
-| **Event Tasks** | Kanban-style tasks | Track status (todo/inprogress/done), priority, assignee |
-| **Incidents** | Anonymous safety reports | Manage severity (green/orange/red), status (reported/reviewing/resolved) |
-| **Activity Logs** | Complete audit trail (read-only) | Track every login, signup, vote, group creation, vibe match |
-
-### Admin Tips
-- **Search**: Use the search bar at the top of any model list
-- **Filter**: Use the right sidebar filters (role, branch, year, status, etc.)
-- **Export**: Select items → Action dropdown → export (if django-import-export added)
-- **Bulk Actions**: Select multiple items → choose action → Run
-
----
-
-## 3. How to Connect to Supabase Database
-
-### Step 1: Get Your Supabase Connection String
-1. Go to https://supabase.com → your project
-2. Navigate to **Settings → Database → Connection string → URI**
-3. Copy the full `postgresql://...` URL
-
-### Step 2: Update .env
-Edit `campus-hive/backend/.env`:
-```env
-DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@db.YOUR_REF.supabase.co:5432/postgres
+```
+campus-hive/
+├── backend/
+│   ├── campus_hive/          # Django project settings
+│   │   ├── settings.py       # Database, middleware, CORS config
+│   │   ├── urls.py           # Root URL config (includes /api/ and /admin/)
+│   │   └── wsgi.py           # WSGI entry point
+│   ├── core/                 # Main app
+│   │   ├── models.py         # All database models (User, Group, Poll, Event, etc.)
+│   │   ├── admin.py          # Django admin registrations
+│   │   ├── urls.py           # All API route definitions
+│   │   ├── views/            # API endpoint handlers
+│   │   │   ├── auth_views.py     # Login, signup, profile
+│   │   │   ├── group_views.py    # Spaces/groups CRUD + join/leave
+│   │   │   ├── poll_views.py     # Polls + voting + AI insight
+│   │   │   ├── event_views.py    # Events + Kanban tasks
+│   │   │   ├── vibe_views.py     # Vibe matcher + requests + AI endpoints
+│   │   │   ├── incident_views.py # Safety reports
+│   │   │   └── admin_views.py    # Admin dashboard API
+│   │   └── utils/
+│   │       ├── ai_utils.py   # AI integration
+│   │       └── vibe_algorithm.py # TF-IDF matching algorithm
+│   ├── db.sqlite3            # ← YOUR DATABASE FILE
+│   ├── manage.py
+│   ├── requirements.txt
+│   ├── seed_data.py
+│   └── .env                  # Environment variables
+├── frontend/
+│   ├── src/
+│   │   ├── App.tsx           # Routes, auth context, state management
+│   │   ├── api.ts            # All API call functions
+│   │   ├── pages/
+│   │   │   ├── Landing.tsx       # Home page
+│   │   │   ├── Login.tsx         # Student login
+│   │   │   ├── Signup.tsx        # Student registration
+│   │   │   ├── Dashboard.tsx     # Main layout + sidebar + notifications
+│   │   │   ├── VibeMatcher.tsx   # ML matching + send/accept requests
+│   │   │   ├── ConnectionPool.tsx # Accepted connections + chat + ideas
+│   │   │   ├── SmartPolls.tsx    # Polls + AI insights
+│   │   │   ├── EventPlanner.tsx  # Events + AI task generation + Kanban
+│   │   │   ├── Spaces.tsx        # Groups/clubs + members tab
+│   │   │   ├── Safety.tsx        # Anonymous incident reporting
+│   │   │   ├── Resources.tsx     # Resource sharing
+│   │   │   ├── AdminLogin.tsx    # Admin login
+│   │   │   └── AdminPanel.tsx    # Admin dashboard
+│   │   └── index.css         # Global styles
+│   └── package.json
+├── Dockerfile                # Full-stack Docker build
+├── docker-compose.yml        # Docker Compose config
+├── nginx.conf                # Nginx config for production
+└── GUIDE.md                  # ← THIS FILE
 ```
 
-### Step 3: Run Migrations
+---
+
+## 3. All Features
+
+### 🔮 Vibe Matcher
+- ML-powered student matching using TF-IDF + Cosine Similarity
+- Multi-factor scoring: tags, branch, year, section
+- **Send/Accept/Decline** vibe connection requests
+- Real-time status: "Request Sent" / "Connected"
+- AI-generated compatibility insights (AI)
+
+### 💜 Connection Pool (NEW)
+- Accepted vibe matches appear here as connections
+- **Private chat** with each connection
+- **Shared spaces** view — spaces you both belong to
+- **Ideas board** — collaboration suggestions (hackathon team, study group, etc.)
+
+### 📊 Smart Polls
+- Create polls inside any joined space
+- Vote with mandatory reasoning (min 10 chars)
+- **AI Insight** button — calls AI to analyze voting reasons
+- Works even before anyone votes (predictive insight)
+- "AI" badge on AI-generated insights
+
+### 📅 Event Planner + AI Task Generation
+- Plan events inside spaces with title, date, budget, attendees
+- **AI generates custom Kanban tasks** based on your event description
+- More detail in description = better AI tasks
+- Shows "AI-Generated Tasks" badge + Bot icon on each task
+- Falls back to smart default tasks if AI is unavailable
+- Kanban board with To Do / In Progress / Done columns
+- Tasks show priority badges (high/medium/low)
+
+### 🌐 Spaces (Full-Screen View)
+- Create Public/Private/Mandatory spaces (clubs, study groups, committees)
+- **Members tab** — see all members with names, avatars, join dates, admin badge
+- Polls and Events tabs per space
+- Full-screen modal (no more small box!)
+- Admin can approve/reject join requests
+
+### 🛡️ Safety Shield
+- Anonymous incident reporting (no login required)
+- Severity levels: Yellow/Orange/Red
+- Reports visible in Django admin panel
+- Activity log tracks all reports
+
+### 📚 Resources
+- Share and browse resources/links
+- Like functionality
+- Comments removed (was non-functional)
+
+### 🔔 Notifications
+- Bell icon shows badge count
+- Incoming vibe match requests with Accept/Decline inline
+- Announcements from admin
+
+### 🛠️ Admin Dashboard
+- User management (view, edit, deactivate, delete)
+- Activity logs with full audit trail
+- Incident management with status updates
+- CSV user import
+- Announcements and resource management
+- Database health check
+
+---
+
+## 4. Database & Data Viewing
+
+### Where Is The Database?
+
+```
+campus-hive/backend/db.sqlite3
+```
+
+This ONE file contains ALL your data. It's a SQLite database.
+
+### View Data: DB Browser for SQLite
+
+1. Download from [sqlitebrowser.org](https://sqlitebrowser.org)
+2. Open → File → Open Database → select `db.sqlite3`
+3. Click **Browse Data** tab
+4. Select table from dropdown:
+
+| Table | Contents |
+|---|---|
+| `ch_users` | All students and admins |
+| `ch_groups` | Spaces/clubs/hubs |
+| `ch_group_members` | Who joined which space + status |
+| `ch_polls` | All polls |
+| `ch_poll_options` | Poll choices |
+| `ch_votes` | Votes with reasons |
+| `ch_events` | Campus events |
+| `ch_event_tasks` | Kanban tasks |
+| `ch_incidents` | Safety reports |
+| `ch_activity_logs` | Full audit trail |
+| `ch_announcements` | Admin notifications |
+| `ch_resources` | Shared links |
+| `ch_vibe_requests` | Vibe match requests (pending/accepted/declined) |
+
+### View Data: Django Admin (Web)
+
+Go to http://localhost:8000/admin → Login with superuser credentials.
+
+### View Data: Command Line
+
 ```powershell
 cd campus-hive\backend
-venv\Scripts\activate
-python manage.py migrate
-python manage.py createsuperuser
-```
-
-### How the DB Switching Works
-The settings automatically detect if Supabase is reachable:
-- **Supabase available** → Uses PostgreSQL (production)
-- **Supabase unreachable** → Falls back to local SQLite (development)
-
-You'll see this in the console:
-```
-[OK] Connected to Supabase PostgreSQL    ← production mode
-[WARN] Supabase unreachable - using local SQLite   ← dev mode
-```
-
----
-
-## 4. Monitor All Database Operations
-
-### Django Admin Activity Logs
-Every user action is automatically logged:
-- Login/Signup attempts
-- Profile updates
-- Group creations
-- Poll votes
-- Event and task management
-- Vibe match requests
-- Incident reports
-
-**View at**: Admin Panel → Activity Logs
-
-### Django Shell (Advanced Queries)
-```powershell
-cd campus-hive\backend
-venv\Scripts\activate
+.\venv\Scripts\activate
 python manage.py shell
-```
-```python
-# Count all users
+
+# Example queries
 from core.models import User
-User.objects.count()
+User.objects.count()                    # Total users
+User.objects.filter(role="admin").count()  # Total admins
 
-# Recent activity
-from core.models import ActivityLog
-ActivityLog.objects.order_by('-timestamp')[:10]
-
-# Users by branch
-User.objects.filter(branch='CSE').count()
-
-# Active polls
-from core.models import Poll
-Poll.objects.filter(is_active=True).count()
+from core.models import VibeRequest
+VibeRequest.objects.filter(status="accepted").count()  # Connections
 ```
 
-### Console Logs
-The Django server prints all HTTP requests:
-```
-[22/Mar/2026 22:45:10] "POST /api/auth/login HTTP/1.1" 200
-[22/Mar/2026 22:45:15] "GET /api/vibe/matches HTTP/1.1" 200
+### Backup Database
+
+```powershell
+copy campus-hive\backend\db.sqlite3 campus-hive\backend\db_backup.sqlite3
 ```
 
 ---
 
-## 5. API Endpoints Reference
+## 5. Authentication
 
-### Auth
-| Method | Endpoint | Auth | Purpose |
-|--------|----------|------|---------|
-| POST | `/api/auth/signup` | No | Register new student |
-| POST | `/api/auth/login` | No | Login, returns JWT |
-| GET | `/api/auth/me` | Yes | Get current user profile |
-| PUT | `/api/auth/me/update` | Yes | Update profile/tags |
+### How It Works
 
-### Groups (Spaces)
-| Method | Endpoint | Auth | Purpose |
-|--------|----------|------|---------|
-| GET | `/api/groups/` | No | List all groups |
-| POST | `/api/groups/create` | Yes | Create group |
-| GET | `/api/groups/<id>` | No | Get group by ID |
-| PUT | `/api/groups/<id>/update` | Yes | Update group |
+```
+Student → /login → email + password → Backend validates →
+JWT token created (24hr) → Stored in browser localStorage →
+Sent with every API request as: Authorization: Bearer <token>
+```
 
-### Polls
-| Method | Endpoint | Auth | Purpose |
-|--------|----------|------|---------|
-| POST | `/api/polls/` | Yes | Create poll |
-| GET | `/api/polls/group/<id>` | No | List polls in group |
-| GET | `/api/polls/<id>` | No | Get poll details |
-| POST | `/api/polls/<id>/vote` | Yes | Vote (with reason) |
+### Key Settings (.env)
 
-### Events
-| Method | Endpoint | Auth | Purpose |
-|--------|----------|------|---------|
-| POST | `/api/events/` | Yes | Create event (optional AI task gen) |
-| GET | `/api/events/group/<id>` | No | List events in group |
-| GET | `/api/events/<id>` | No | Get event details |
-| POST | `/api/events/<id>/tasks` | Yes | Add task manually |
-| PATCH | `/api/events/tasks/<id>` | Yes | Update task status |
+```
+SECRET_KEY=campus-hive-super-secret-jwt-key-2024-change-in-prod
+JWT_ALGORITHM=HS256
+JWT_ACCESS_TOKEN_EXPIRES_HOURS=24
+```
 
-### Vibe Matcher
-| Method | Endpoint | Auth | Purpose |
-|--------|----------|------|---------|
-| GET | `/api/vibe/matches` | Yes | Get ML-powered matches |
-| GET | `/api/vibe/score` | Yes | Get vibe score |
-| POST | `/api/vibe/tags` | Yes | Update interest tags |
+### Creating Admin Users
 
-### Incidents
-| Method | Endpoint | Auth | Purpose |
-|--------|----------|------|---------|
-| POST | `/api/incidents/report` | No | Report incident (anonymous) |
-| GET | `/api/incidents/` | Yes | List all incidents |
-| PATCH | `/api/incidents/<id>/status` | Yes | Update incident status |
+```powershell
+.\venv\Scripts\activate
+python manage.py createsuperuser
+# Enter email, username, password
+```
+
+Or in Django Admin → Users → Add User → Set `is_staff=True`, `is_superuser=True`
 
 ---
 
-## 6. Docker Deployment
+## 6. AI Features (AI)
 
-### Build & Run Locally
+### API Key
+
+Set in `.env`:
+```
+AI_API_KEY=AIzaSyAC3BI2WFqTFUmtBoaNR4ogy-d4OVH4o2c
+```
+
+### What AI Does
+
+| Feature | How It Works |
+|---|---|
+| **Poll AI Insight** | Analyzes voting reasons → 3 bullet-point summary. Works even before votes (predictive). |
+| **Event Task Generation** | Takes event description → generates 5-8 custom Kanban tasks with priorities. |
+| **Vibe Match Insight** | Generates a fun compatibility sentence based on shared interests. |
+
+### Testing AI
+
+1. Create a poll → Click "AI Insight" button → Should show AI response
+2. Create an event with detailed description → Tasks should be AI-generated with 🤖 icon
+3. Run vibe matcher → Match insights should be contextual
+
+### If AI Doesn't Work
+
+- Check `AI_API_KEY` is set in `.env`
+- Check `google-generativeai` is installed: `pip install google-generativeai`
+- The app falls back gracefully — default tasks and insights are used
+
+---
+
+## 7. Docker Deployment
+
+### Prerequisites
+
+- Docker + Docker Compose installed
+
+### Steps
+
 ```bash
 cd campus-hive
-docker-compose up --build -d
-```
 
-### Access After Docker
-- Frontend: http://localhost (port 80)
-- Admin Panel: http://localhost/admin/
-- API: http://localhost/api/
-
-### Create Admin User in Docker
-```bash
-docker exec -it campushive-backend python manage.py createsuperuser
-```
-
-### View Logs
-```bash
-docker-compose logs -f backend     # Django logs
-docker-compose logs -f frontend    # Nginx logs
-docker-compose logs -f             # All logs
-```
-
-### Restart Services
-```bash
-docker-compose restart backend
-docker-compose restart frontend
-docker-compose restart    # All
-```
-
-### Update Code & Redeploy
-```bash
-git pull
-docker-compose up --build -d
-```
-
----
-
-## 7. AWS EC2 Deployment Guide
-
-### Step 1: Launch EC2 Instance
-1. Go to AWS Console → EC2 → **Launch Instance**
-2. Settings:
-   - **AMI**: Ubuntu 22.04 LTS
-   - **Instance Type**: t2.micro (free tier) or t2.small for production
-   - **Key Pair**: Create or select an existing SSH key
-   - **Security Group Rules**:
-     - SSH (22) — Your IP
-     - HTTP (80) — Anywhere (0.0.0.0/0)
-     - HTTPS (443) — Anywhere
-     - Custom TCP (8000) — Anywhere (for Django admin direct access)
-
-### Step 2: Connect to EC2
-```bash
-ssh -i your-key.pem ubuntu@<EC2-PUBLIC-IP>
-```
-
-### Step 3: Install Docker on EC2
-```bash
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y docker.io docker-compose git
-sudo usermod -aG docker $USER
-# Log out and back in for group changes
-exit
-ssh -i your-key.pem ubuntu@<EC2-PUBLIC-IP>
-```
-
-### Step 4: Clone & Deploy
-```bash
-git clone <YOUR-GITHUB-REPO-URL> campus-hive
-cd campus-hive
-
-# Copy your .env file
-nano backend/.env
-# Paste your DATABASE_URL, GEMINI_API_KEY, SECRET_KEY, etc.
+# Build frontend first (needed for nginx)
+cd frontend && npm install && npm run build && cd ..
 
 # Build and start
 docker-compose up --build -d
 
-# Create admin user
-docker exec -it campushive-backend python manage.py migrate
-docker exec -it campushive-backend python manage.py createsuperuser
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
 ```
 
-### Step 5: Access Your App
-- Frontend: `http://<EC2-PUBLIC-IP>`
-- Admin: `http://<EC2-PUBLIC-IP>/admin/`
-- API: `http://<EC2-PUBLIC-IP>/api/`
+**Access:**
+- Frontend: http://localhost (port 80)
+- Backend API: http://localhost/api/
+- Admin Panel: http://localhost/admin/
 
----
+### Stop / Restart
 
-## 8. Security Best Practices
-
-| Practice | How |
-|----------|-----|
-| Change SECRET_KEY | Generate with `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` |
-| Set DEBUG=False | In `.env`: `DJANGO_DEBUG=False` |
-| Set ALLOWED_HOSTS | In `settings.py`: `ALLOWED_HOSTS = ["your-domain.com", "EC2-IP"]` |
-| Use HTTPS | Set up SSL with Let's Encrypt / Certbot |
-| Rotate JWT secret | Change `SECRET_KEY` periodically |
-| Monitor logs | Check `docker-compose logs` regularly |
-| Backup database | Supabase has automatic backups; for SQLite, backup `db.sqlite3` |
-
----
-
-## 9. Project Architecture
-
-```
-campus-hive/
-├── docker-compose.yml          ← Orchestrates backend + frontend
-├── backend/
-│   ├── Dockerfile              ← Python 3.13 container
-│   ├── manage.py               ← Django management
-│   ├── requirements.txt        ← Django + DRF + JWT + numpy + Gemini
-│   ├── .env                    ← DATABASE_URL, GEMINI_API_KEY, SECRET_KEY
-│   ├── test_api.py             ← 30-endpoint API test suite
-│   ├── campus_hive/            ← Django project (settings, urls, wsgi)
-│   └── core/                   ← Main app
-│       ├── models.py           ← 9 models with Django ORM
-│       ├── admin.py            ← Full admin panel config
-│       ├── urls.py             ← API route mapping
-│       ├── views/              ← 6 API view modules
-│       └── utils/              ← vibe_algorithm.py, gemini_utils.py
-├── frontend/
-│   ├── Dockerfile              ← Node 22 build + Nginx serve
-│   ├── nginx.conf              ← SPA routing + API proxy
-│   ├── src/
-│   │   ├── api.ts              ← API service (fetch + JWT)
-│   │   ├── App.tsx             ← Router + Auth context
-│   │   └── pages/              ← All page components
-│   └── vite.config.ts          ← Dev proxy → localhost:8000
-└── batch/
-    ├── setup_backend.bat       ← Install + migrate + superuser
-    ├── setup_frontend.bat      ← npm install
-    └── start_all.bat           ← Launch both servers
+```bash
+docker-compose down        # Stop
+docker-compose up -d       # Start again
+docker-compose restart     # Restart
 ```
 
 ---
 
-## 10. Troubleshooting
+## 8. AWS EC2 Deployment (Free Tier)
 
-| Issue | Fix |
-|-------|-----|
-| `Supabase unreachable` | Normal locally — uses SQLite fallback. Check DATABASE_URL for production. |
-| `Module not found` errors | Run `venv\Scripts\activate` then `pip install -r requirements.txt` |
-| Admin login fails | Run `python manage.py createsuperuser` to create new admin |
-| Frontend can't reach API | Check Django is running on port 8000; check vite proxy config |
-| JWT token expired | Tokens last 24 hours. Login again to get a new token. |
-| Migration errors | Run `python manage.py makemigrations core` then `python manage.py migrate` |
-| Port already in use | Kill existing process: `netstat -ano | findstr :8000` then `taskkill /PID <PID> /F` |
+### Step 1: Launch EC2
+
+1. Go to [AWS Console](https://console.aws.amazon.com) → EC2
+2. Click **Launch Instance**
+3. Settings:
+   - **Name:** Campus-Hive
+   - **AMI:** Ubuntu Server 22.04 LTS (Free Tier)
+   - **Instance Type:** t2.micro (Free Tier)
+   - **Key Pair:** Create new → Download `.pem` file
+   - **Storage:** 8 GB gp3
+
+### Step 2: Security Group
+
+Add these inbound rules:
+
+| Type | Port | Source |
+|---|---|---|
+| SSH | 22 | My IP |
+| HTTP | 80 | 0.0.0.0/0 |
+| Custom TCP | 8000 | 0.0.0.0/0 |
+
+### Step 3: Connect (MobaXterm)
+
+- Remote Host: (your EC2 Public IP)
+- Username: ubuntu
+- Private key: your `.pem` file
+
+### Step 4: Install Everything
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y python3 python3-pip python3-venv nginx git
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
+```
+
+### Step 5: Clone & Setup Backend
+
+```bash
+cd /home/ubuntu
+git clone https://github.com/YOUR_USERNAME/campus-hive.git
+cd campus-hive/backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+pip install gunicorn
+
+# Create .env
+cat > .env << 'EOF'
+SECRET_KEY=your-random-64-char-key-here
+DJANGO_DEBUG=False
+AI_API_KEY=AIzaSyAC3BI2WFqTFUmtBoaNR4ogy-d4OVH4o2c
+CORS_ORIGINS=http://YOUR_EC2_IP
+EOF
+
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py collectstatic --noinput
+```
+
+### Step 6: Build Frontend
+
+```bash
+cd /home/ubuntu/campus-hive/frontend
+echo "VITE_API_URL=http://YOUR_EC2_IP/api" > .env
+npm install
+npm run build
+```
+
+### Step 7: Configure Nginx
+
+```bash
+sudo nano /etc/nginx/sites-available/campus-hive
+```
+
+Paste:
+```nginx
+server {
+    listen 80;
+    server_name _;
+
+    root /home/ubuntu/campus-hive/frontend/dist;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    location /admin/ {
+        proxy_pass http://127.0.0.1:8000/admin/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location /static/ {
+        alias /home/ubuntu/campus-hive/backend/staticfiles/;
+    }
+}
+```
+
+```bash
+sudo ln -s /etc/nginx/sites-available/campus-hive /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl restart nginx
+```
+
+### Step 8: Create Backend Service
+
+```bash
+sudo nano /etc/systemd/system/campus-hive.service
+```
+
+Paste:
+```ini
+[Unit]
+Description=Campus Hive Backend
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/campus-hive/backend
+ExecStart=/home/ubuntu/campus-hive/backend/venv/bin/gunicorn campus_hive.wsgi:application --bind 127.0.0.1:8000 --workers 2
+Restart=always
+Environment="DJANGO_SETTINGS_MODULE=campus_hive.settings"
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable campus-hive
+sudo systemctl start campus-hive
+sudo systemctl status campus-hive
+```
+
+### Step 9: Verify
+
+- http://YOUR_EC2_IP → Frontend
+- http://YOUR_EC2_IP/admin → Django Admin
+- Register account → Test features
+
+### Step 10: Update Script
+
+```bash
+cat > /home/ubuntu/update.sh << 'EOF'
+#!/bin/bash
+cd /home/ubuntu/campus-hive
+git pull origin main
+cd backend
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+cd ../frontend
+npm install && npm run build
+sudo systemctl restart campus-hive
+sudo systemctl restart nginx
+echo "✅ Updated!"
+EOF
+chmod +x /home/ubuntu/update.sh
+```
+
+Run `./update.sh` after every `git push`.
+
+---
+
+## 9. Admin Panel
+
+### Access
+
+- **Local:** http://localhost:8000/admin
+- **EC2:** http://YOUR_EC2_IP/admin
+
+### What You Can Manage
+
+| Section | Actions |
+|---|---|
+| Users | View, edit, deactivate, delete users |
+| Groups | Create/manage spaces, see member counts |
+| Group Members | Approve or reject join requests |
+| Polls | Manage polls and options |
+| Events | Manage events and tasks |
+| Incidents | View safety reports, update status |
+| Vibe Requests | See all match requests, change status |
+| Activity Logs | Full audit trail of all user actions |
+| Announcements | Post notifications to student bell icon |
+| Resources | Manage shared links |
+
+---
+
+## 10. API Reference
+
+### Auth
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/auth/signup` | Register new user |
+| POST | `/api/auth/login` | Login → returns JWT |
+| GET | `/api/auth/me` | Get current user profile |
+| PUT | `/api/auth/me/update` | Update profile |
+
+### Vibe Matcher
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/vibe/matches` | Get ML-ranked matches |
+| POST | `/api/vibe/request` | Send connection request |
+| GET | `/api/vibe/requests` | Get incoming/outgoing/connections |
+| POST | `/api/vibe/requests/{id}/respond` | Accept or decline |
+
+### AI Endpoints
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/ai/generate-tasks` | AI generates event tasks |
+| POST | `/api/ai/poll-insight` | AI generates poll insight |
+
+### Groups/Spaces
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/groups/` | List all groups |
+| POST | `/api/groups/create` | Create new group |
+| POST | `/api/groups/{id}/join` | Join or request to join |
+| GET | `/api/groups/{id}/members` | List members |
+
+### Polls
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/polls/` | Create poll |
+| GET | `/api/polls/group/{id}` | List polls in group |
+| POST | `/api/polls/{id}/vote` | Vote with reason |
+
+### Events
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/events/` | Create event |
+| GET | `/api/events/group/{id}` | List events in group |
+| POST | `/api/events/{id}/tasks` | Add task to event |
+| PATCH | `/api/events/tasks/{id}` | Update task status |
+
+### Incidents
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/incidents/report` | Report incident (no auth) |
+| GET | `/api/incidents/` | List all (auth required) |
+
+---
+
+## 11. Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| Backend won't start | Check `.\venv\Scripts\activate` is run first |
+| `ModuleNotFoundError` | Run `pip install -r requirements.txt` |
+| Frontend blank page | Run `npm run build`, check console errors |
+| "502 Bad Gateway" on EC2 | Restart: `sudo systemctl restart campus-hive` |
+| Admin login fails | Run `python manage.py createsuperuser` |
+| AI not working | Check `AI_API_KEY` in `.env` |
+| Database locked | Stop all Django processes, retry |
+| Supabase warning | Normal — using SQLite fallback |
+| Docker build fails | Check Docker is running, try `docker-compose build --no-cache` |
+
+### Useful Commands
+
+```powershell
+# Check backend logs (EC2)
+sudo journalctl -u campus-hive -n 50
+
+# Restart services (EC2)
+sudo systemctl restart campus-hive
+sudo systemctl restart nginx
+
+# Backup database
+copy backend\db.sqlite3 backend\db_backup.sqlite3
+
+# Django shell
+.\venv\Scripts\activate
+python manage.py shell
+```
+
+---
+
+## Free Tier Limits
+
+| Resource | Limit |
+|---|---|
+| EC2 t2.micro | 750 hrs/month (24/7 = ~730 hrs ✅) |
+| EBS Storage | 30 GB |
+| Data Transfer | 15 GB/month outbound |
+
+> ⚠️ Running 1 t2.micro 24/7 fits free tier. Don't launch extra instances.
+
+---
+
+**Built with Django + React + TailwindCSS + AI**

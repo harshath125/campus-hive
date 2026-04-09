@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BarChart3, Sparkles, MessageSquare, Plus, Bot, X, Check, Globe, Lock, Wand2 } from "lucide-react";
+import { BarChart3, Sparkles, MessageSquare, Plus, Bot, X, Check, Globe, Lock, Wand2, Zap } from "lucide-react";
 import { useAuth } from "../App";
+import { apiPollInsight } from "../api";
 
 export default function SmartPolls() {
     const { polls, addPoll, voteOnPoll, user, joinedSpaces, spaces } = useAuth();
@@ -13,6 +14,8 @@ export default function SmartPolls() {
     const [votingPollId, setVotingPollId] = useState<number | null>(null);
     const [reason, setReason] = useState("");
     const [filterSpace, setFilterSpace] = useState<number | "all">("all");
+    const [loadingAI, setLoadingAI] = useState<number | null>(null);
+    const [liveInsights, setLiveInsights] = useState<Record<number, string>>({}); // pollId -> insight
 
     // Only show polls from joined spaces
     const mySpaces = spaces.filter(s => joinedSpaces.includes(s.id));
@@ -33,6 +36,21 @@ export default function SmartPolls() {
             isActive: true,
         });
         setQuestion(""); setOptions(["", ""]); setSelectedSpaceId(""); setShowCreate(false);
+    };
+
+    const handleGetAIInsight = async (pollId: number, question: string, pollAiInsight?: string) => {
+        // If already have backend insight, just show it
+        if (pollAiInsight) { setShowAI(showAI === pollId ? null : pollId); return; }
+        // If we already fetched live insight
+        if (liveInsights[pollId]) { setShowAI(showAI === pollId ? null : pollId); return; }
+        setLoadingAI(pollId);
+        try {
+            const data = await apiPollInsight(question);
+            if (data.insight) setLiveInsights(prev => ({ ...prev, [pollId]: data.insight }));
+        } catch { /* silent */ } finally {
+            setLoadingAI(null);
+            setShowAI(pollId);
+        }
     };
 
     const getSpaceName = (id: number) => spaces.find(s => s.id === id)?.name || "";
@@ -155,22 +173,19 @@ export default function SmartPolls() {
 
                                     <div className="flex items-center justify-between pt-3 border-t border-white/5">
                                         <span className="text-xs text-slate-500">{total} total votes · by {poll.createdBy}</span>
-                                        {poll.aiInsight ? (
-                                            <button onClick={() => setShowAI(showAI === poll.id ? null : poll.id)}
-                                                className="flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 transition-colors">
-                                                <Bot className="w-3.5 h-3.5" /> {showAI === poll.id ? "Hide" : "AI Insight"}
-                                            </button>
-                                        ) : poll.isActive && !poll.userVote && (
-                                            <button onClick={() => setVotingPollId(isVoting ? null : poll.id)}
-                                                className="text-xs text-slate-400 hover:text-amber-400 transition-colors">
-                                                {isVoting ? "Cancel voting" : "Vote now →"}
-                                            </button>
-                                        )}
+                                        <button
+                                            onClick={() => handleGetAIInsight(poll.id, poll.question, poll.aiInsight)}
+                                            disabled={loadingAI === poll.id}
+                                            className="flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 transition-colors disabled:opacity-60">
+                                            {loadingAI === poll.id
+                                                ? <><div className="w-3 h-3 border border-amber-400/40 border-t-amber-400 rounded-full animate-spin" /> Getting insight...</>
+                                                : <><Bot className="w-3.5 h-3.5" /> {showAI === poll.id ? "Hide Insight" : "AI Insight"}</>}
+                                        </button>
                                     </div>
                                 </div>
 
                                 <AnimatePresence>
-                                    {showAI === poll.id && poll.aiInsight && (
+                                    {showAI === poll.id && (poll.aiInsight || liveInsights[poll.id]) && (
                                         <motion.div className="px-5 pb-5"
                                             initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
                                             <div className="glass-strong rounded-xl p-4 relative overflow-hidden">
@@ -178,10 +193,11 @@ export default function SmartPolls() {
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <Sparkles className="w-4 h-4 text-amber-400" />
                                                     <span className="text-xs font-semibold text-white">AI Collective Insight</span>
+                                                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 ml-auto">AI Powered</span>
                                                 </div>
-                                                {poll.aiInsight.split("\n").map((line, i) => (
+                                                {(poll.aiInsight || liveInsights[poll.id] || "").split("\n").map((line, i) => (
                                                     <p key={i} className="text-xs text-slate-300 mb-1 flex items-start gap-1.5">
-                                                        <span className="text-amber-400 mt-0.5">•</span>{line.replace(/^•\s*/, "")}
+                                                        <span className="text-amber-400 mt-0.5">•</span>{line.replace(/^[•\-]\s*/, "")}
                                                     </p>
                                                 ))}
                                             </div>

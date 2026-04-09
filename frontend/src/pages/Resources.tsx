@@ -147,7 +147,6 @@ export default function Resources() {
                                     className={`flex items-center gap-1.5 text-xs transition-colors ${liked[post.id] ? "text-red-400" : "text-slate-500 hover:text-red-400"}`}>
                                     <Heart className={`w-4 h-4 ${liked[post.id] ? "fill-current" : ""}`} />{post.likes + (liked[post.id] ? 1 : 0)}
                                 </button>
-                                <span className="flex items-center gap-1.5 text-xs text-slate-500"><MessageCircle className="w-4 h-4" />{post.comments}</span>
                             </div>
                         </motion.div>
                     );

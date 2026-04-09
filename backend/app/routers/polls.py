@@ -1,6 +1,6 @@
 """
 Polls Blueprint – /api/polls
-Smart polls with AI-powered consensus summary (Gemini).
+Smart polls with AI-powered consensus summary (AI).
 Requires JWT for all write operations.
 """
 from flask import Blueprint, request, jsonify
@@ -8,7 +8,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from app.extensions import db
 from app.models import Poll, PollOption, Vote, Group
-from app.utils.gemini_utils import summarize_poll_reasons
+from app.utils.ai_utils import summarize_poll_reasons
 
 polls_bp = Blueprint("polls", __name__)
 
@@ -74,7 +74,7 @@ def create_poll():
 @polls_bp.route("/<int:poll_id>/vote", methods=["POST"])
 @jwt_required()
 def vote(poll_id):
-    """Cast a vote with a reason. Triggers Gemini AI insight after 3+ votes."""
+    """Cast a vote with a reason. Triggers AI insight after 3+ votes."""
     user_id = int(get_jwt_identity())
     data = request.get_json(silent=True) or {}
 

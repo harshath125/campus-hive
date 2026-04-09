@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from app.extensions import db
 from app.models import Event, EventTask, Group, TaskStatus, Priority
-from app.utils.gemini_utils import generate_event_tasks
+from app.utils.ai_utils import generate_event_tasks
 
 events_bp = Blueprint("events", __name__)
 
@@ -31,7 +31,7 @@ def list_events(group_id):
 def create_event():
     """
     Create a new event.
-    Pass generate_tasks=true to auto-generate Kanban tasks via Gemini.
+    Pass generate_tasks=true to auto-generate Kanban tasks via AI.
     """
     data = request.get_json(silent=True)
     if not data or "group_id" not in data or "title" not in data:
@@ -52,7 +52,7 @@ def create_event():
     db.session.add(event)
     db.session.flush()
 
-    # Auto-generate tasks from Gemini
+    # Auto-generate tasks from AI
     tasks_created = []
     if data.get("generate_tasks", False):
         event_details = f"Event: {event.title}\nDescription: {event.description or 'N/A'}\nBudget: {event.budget or 'N/A'}"

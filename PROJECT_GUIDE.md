@@ -385,7 +385,7 @@ vibe project/
     ├── PROJECT_GUIDE.md     ← This file (architecture + UML)
     │
     ├── backend/             ← Flask REST API
-    │   ├── .env             ← Supabase + JWT + Gemini credentials
+    │   ├── .env             ← Supabase + JWT + AI credentials
     │   ├── requirements.txt
     │   ├── run.py           ← Entry point
     │   ├── app/

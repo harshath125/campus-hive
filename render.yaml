@@ -1,29 +1,26 @@
+# ============================================
+# Campus Hive — Render.com Deployment Config
+# ============================================
+# Single service: Django serves both API + React frontend
+# Free tier compatible
+
 services:
-  # ── Django Backend ──
   - type: web
-    name: campushive-backend
+    name: campus-hive
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: campus_hive.settings
       - key: DJANGO_DEBUG
         value: "False"
-      - key: ALLOWED_HOSTS
-        value: "*"
-      - key: DATABASE_URL
-        sync: false  # You set this manually in Render dashboard
-      - key: GEMINI_API_KEY
-        sync: false  # You set this manually in Render dashboard
       - key: SECRET_KEY
         generateValue: true
+      - key: DATABASE_URL
+        sync: false  # Set manually in Render dashboard (Supabase URL or leave empty for SQLite)
+      - key: GEMINI_API_KEY
+        sync: false  # Set manually in Render dashboard
       - key: CORS_ORIGINS
-        value: "https://campushive-frontend.onrender.com"
-
-  # ── React Frontend ──
-  - type: web
-    name: campushive-frontend
-    runtime: docker
-    dockerfilePath: ./frontend/Dockerfile
-    dockerContext: ./frontend
+        value: "*"

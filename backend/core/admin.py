@@ -8,7 +8,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
     User, Group, GroupMember, Poll, PollOption, Vote,
     Event, EventTask, Incident, ActivityLog,
-    Announcement, Resource,
+    Announcement, Resource, VibeRequest,
 )
 
 
@@ -196,3 +196,15 @@ class AnnouncementAdmin(admin.ModelAdmin):
 class ResourceAdmin(admin.ModelAdmin):
     list_display = ("title", "url", "created_by", "created_at")
     search_fields = ("title", "description", "url")
+
+
+# ── Vibe Request Admin ─────────────────────────────────────────────────────
+
+@admin.register(VibeRequest)
+class VibeRequestAdmin(admin.ModelAdmin):
+    list_display = ("from_user", "to_user", "status", "score", "created_at", "responded_at")
+    list_filter = ("status",)
+    search_fields = ("from_user__email", "from_user__name", "to_user__email", "to_user__name")
+    raw_id_fields = ("from_user", "to_user")
+    list_editable = ("status",)
+

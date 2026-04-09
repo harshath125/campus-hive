@@ -224,7 +224,7 @@ Create a safe `.env.example` (no real values):
 ```
 DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@db.YOUR_PROJECT.supabase.co:5432/postgres
 SECRET_KEY=change-this-in-production
-GEMINI_API_KEY=your-api-key-here
+AI_API_KEY=your-api-key-here
 FLASK_ENV=development
 FLASK_DEBUG=True
 FLASK_PORT=5000
