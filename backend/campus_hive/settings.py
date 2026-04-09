@@ -17,6 +17,9 @@ SECRET_KEY = os.getenv("SECRET_KEY", "campus-hive-super-secret-jwt-key-2024-chan
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 ALLOWED_HOSTS = ["*"]
 
+# Allow CSRF for admin login on Render
+CSRF_TRUSTED_ORIGINS = ["https://*.onrender.com", "http://localhost:5173", "http://localhost:8000"]
+
 # ── Installed Apps ──────────────────────────────────────────────────────────
 INSTALLED_APPS = [
     "django.contrib.admin",
