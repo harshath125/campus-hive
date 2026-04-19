@@ -1,20 +1,20 @@
 /**
  * API service for Campus Hive frontend.
- * - Render.com: Set VITE_API_URL env var to backend URL
- * - Docker: Uses /api (nginx proxies to backend container)
+ * Split deployment: Frontend on Vercel, Backend on Render
+ * - Set VITE_API_URL in Vercel dashboard to point to Render backend
  * - Local dev: Uses http://localhost:8000/api
  */
 
 function getApiBase(): string {
-  // 1. Check for explicit env var (set in Render dashboard)
+  // 1. Check for explicit env var (set in Vercel/Render dashboard)
   const envUrl = (import.meta as any).env?.VITE_API_URL;
   if (envUrl) return envUrl;
   // 2. Local development
   if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
     return "http://localhost:8000/api";
   }
-  // 3. Docker or same-origin production
-  return "/api";
+  // 3. Same-origin fallback (if still using single-container deploy)
+  return `${window.location.origin}/api`;
 }
 
 const API_BASE = getApiBase();

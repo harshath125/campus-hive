@@ -40,16 +40,8 @@ def get_vibe_matches(request):
     # Run the enhanced matching algorithm
     matches = find_vibe_matches(user, all_users, top_n=10)
 
-    # Add AI-powered insights for top matches
-    for match in matches[:5]:
-        common = match["common_tags"]
-        score = match["score"]
-        other_name = match["user"]["name"]
-        insight = generate_vibe_insight(user.name, other_name, common, score)
-        match["insight"] = insight
-
-    # For remaining matches, use fallback insights
-    for match in matches[5:]:
+    # Use instant fallback insights (AI calls removed for speed — each took 2-4s)
+    for match in matches:
         common = match["common_tags"]
         from core.utils.ai_utils import _fallback_insight
         match["insight"] = _fallback_insight(common)

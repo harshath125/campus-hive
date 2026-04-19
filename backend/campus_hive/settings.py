@@ -17,8 +17,8 @@ SECRET_KEY = os.getenv("SECRET_KEY", "campus-hive-super-secret-jwt-key-2024-chan
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 ALLOWED_HOSTS = ["*"]
 
-# Allow CSRF for admin login on Render
-CSRF_TRUSTED_ORIGINS = ["https://*.onrender.com", "http://localhost:5173", "http://localhost:8000"]
+# Allow CSRF for admin login on Render & Vercel
+CSRF_TRUSTED_ORIGINS = ["https://*.onrender.com", "https://*.vercel.app", "http://localhost:5173", "http://localhost:8000"]
 
 # ── Installed Apps ──────────────────────────────────────────────────────────
 INSTALLED_APPS = [
@@ -78,7 +78,8 @@ SQLITE_DB = {
 }
 
 def _build_pg_config(url):
-    pattern = r"postgresql://(?P<user>[^:]+):(?P<password>[^@]+)@(?P<host>[^:]+):(?P<port>\d+)/(?P<name>.+)"
+    # Supports: postgresql://user:pass@host:port/db?params  AND  postgresql://user:pass@host/db?params
+    pattern = r"postgresql://(?P<user>[^:]+):(?P<password>[^@]+)@(?P<host>[^:/]+)(?::(?P<port>\d+))?/(?P<name>[^?]+)"
     match = re.match(pattern, url)
     if not match:
         return None
@@ -88,7 +89,7 @@ def _build_pg_config(url):
         "USER": match.group("user"),
         "PASSWORD": match.group("password"),
         "HOST": match.group("host"),
-        "PORT": match.group("port"),
+        "PORT": match.group("port") or "5432",
         "OPTIONS": {"sslmode": "require"},
     }
 
@@ -140,12 +141,13 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
 }
 
-# ── CORS ────────────────────────────────────────────────────────────────────
+# ── CORS (split deployment: frontend on Vercel, backend on Render) ──────────
 CORS_ALLOWED_ORIGINS = [
     o.strip()
     for o in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
 ]
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+# Always allow CORS for split deployment (Vercel frontend → Render backend)
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # ── AI Integration ──────────────────────────────────────────────────────────

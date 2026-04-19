@@ -1,14 +1,14 @@
 # ============================================
 # Campus Hive — Render.com Deployment Config
 # ============================================
-# Single service: Django serves both API + React frontend
-# Free tier compatible
+# Backend API only (frontend deployed on Vercel)
+# Database: Neon PostgreSQL (always-on, auto-wake)
 
 services:
   - type: web
-    name: campus-hive
+    name: campus-hive-api
     runtime: docker
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./Dockerfile.backend
     dockerContext: .
     plan: free
     envVars:
@@ -19,8 +19,8 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        sync: false  # Set manually in Render dashboard (Supabase URL or leave empty for SQLite)
+        sync: false  # Set in Render dashboard: Neon PostgreSQL URL
       - key: GEMINI_API_KEY
-        sync: false  # Set manually in Render dashboard
+        sync: false  # Set in Render dashboard
       - key: CORS_ORIGINS
         value: "*"

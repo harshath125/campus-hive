@@ -1,0 +1,37 @@
+# ============================================
+# Campus Hive — Backend-Only Production Dockerfile
+# Lightweight: No Node.js, no frontend build
+# ============================================
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system deps (PostgreSQL client only)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev gcc && \
+    rm -rf /var/lib/apt/lists/*
+
+# ── Dependencies ──
+COPY backend/requirements.txt ./backend/
+RUN pip install --no-cache-dir -r backend/requirements.txt gunicorn
+
+# ── Copy Backend ──
+COPY backend/ ./backend/
+
+# ── Django Setup ──
+ENV DJANGO_SETTINGS_MODULE=campus_hive.settings
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_DEBUG=False
+
+WORKDIR /app/backend
+
+# Collect static files (for Django admin panel)
+RUN python manage.py collectstatic --noinput 2>/dev/null || true
+
+EXPOSE 8000
+
+# Migrate + Create admin + Start Gunicorn
+CMD python manage.py migrate --noinput 2>/dev/null || true && \
+    python create_admin.py && \
+    gunicorn campus_hive.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120
