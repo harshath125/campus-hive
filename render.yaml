@@ -1,8 +1,10 @@
 # ============================================
-# Campus Hive — Render.com Deployment Config
+# Campus Hive — Render.com Blueprint Config
 # ============================================
-# Backend API only (frontend deployed on Vercel)
-# Database: Neon PostgreSQL (always-on, auto-wake)
+# One-click deploy: Backend API only
+# Frontend: Deploy separately on Vercel
+# Database: Neon PostgreSQL (auto-wake, free)
+# ============================================
 
 services:
   - type: web
@@ -19,8 +21,10 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        sync: false  # Set in Render dashboard: Neon PostgreSQL URL
+        value: "postgresql://neondb_owner:npg_SDIiwVK7lY2c@ep-soft-math-a1k9edaf-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
       - key: GEMINI_API_KEY
-        sync: false  # Set in Render dashboard
+        value: "AIzaSyAC3BI2WFqTFUmtBoaNR4ogy-d4OVH4o2c"
       - key: CORS_ORIGINS
         value: "*"
+      - key: ADMIN_PASSWORD
+        value: "adminpassword123"
