@@ -22,22 +22,25 @@ def _get_model():
     return genai.GenerativeModel("gemini-2.0-flash")
 
 
+import re
+
 def summarize_poll_reasons(reasons: List[str]) -> Optional[str]:
-    """Summarize poll voting reasons into 3 key insights using AI."""
+    """Summarize poll voting reasons into deep, conversational insights using AI."""
     model = _get_model()
     if not model or not reasons:
         return None
 
-    prompt = f"""Analyze these voting reasons from a student campus poll and give exactly 3 bullet points 
-summarizing the main themes and sentiments. Be concise and insightful.
+    prompt = f"""Read these voting reasons from a campus poll. I want you to act as an expert community analyst.
+Give a brief, natural-sounding paragraph explaining exactly how the users are thinking.
+Focus on:
+1. What the majority of people are thinking and their main motivation.
+2. The most likely path chosen based on sentiment.
+3. Any interesting minority opinion or concern.
 
 Voting Reasons:
 {chr(10).join(f'- {r}' for r in reasons)}
 
-Format:
-• [Majority opinion insight]
-• [Minority view or concern]  
-• [Possible compromise or action item]"""
+Do not use generic bullet points. Start directly with "The majority of people are thinking..." or similar."""
 
     try:
         response = model.generate_content(prompt)
@@ -48,41 +51,40 @@ Format:
 
 
 def generate_event_tasks(event_details: str, member_count: int) -> List[dict]:
-    """Generate a Kanban task list for an event using AI."""
+    """Generate a dynamic Kanban task list for an event using AI, ensuring valid JSON extraction."""
     default_tasks = [
         {"title": "Venue Booking", "description": "Confirm and reserve the venue", "priority": "high"},
         {"title": "Sponsor Outreach", "description": "Contact potential sponsors", "priority": "high"},
         {"title": "Marketing Campaign", "description": "Create social media and poster content", "priority": "medium"},
-        {"title": "Catering Arrangements", "description": "Organize food and beverages", "priority": "medium"},
-        {"title": "Registration Portal", "description": "Set up online registration form", "priority": "high"},
-        {"title": "Volunteer Coordination", "description": "Recruit and brief volunteers", "priority": "low"},
     ]
 
     model = _get_model()
     if not model:
         return default_tasks
 
-    prompt = f"""Generate a task list for this campus event:
+    prompt = f"""You are a professional event planner. Generate a highly specific task board for this campus event:
 
 {event_details}
 Team size: {member_count} people
 
-Return ONLY a valid JSON array of 5-8 tasks:
+Return ONLY a valid JSON array of 5-8 tasks. No markdown formatting, no explanations, just raw JSON.
+Example format:
 [
-  {{"title": "Task Name", "description": "Brief description", "priority": "high|medium|low"}},
-  ...
-]
-No extra text, just the JSON array."""
+  {{"title": "Specific Task Name", "description": "What exactly needs to be done", "priority": "high"}},
+  {{"title": "Another Task", "description": "Details", "priority": "medium"}}
+]"""
 
     try:
         response = model.generate_content(prompt)
         text = response.text.strip()
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-        text = text.strip().rstrip("```")
-        return json.loads(text)
+        # Aggressively extract JSON array using Regex to bypass Markdown blocks
+        match = re.search(r"\[.*\]", text, re.DOTALL)
+        if match:
+            extracted_json = match.group(0)
+            return json.loads(extracted_json)
+        else:
+            print("[AI] Failed to parse JSON array from Gemini response")
+            return default_tasks
     except Exception as e:
         print(f"[AI] generate_event_tasks error: {e}")
         return default_tasks

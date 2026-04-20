@@ -52,11 +52,17 @@ def create_poll(request):
     except Group.DoesNotExist:
         return JsonResponse({"error": "Group not found"}, status=404)
 
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    # Default to strictly 7 days from creation to ensure polls stay open
+    ends_at_data = timezone.now() + timedelta(days=7)
+
     poll = Poll.objects.create(
         group=group,
         question=data["question"].strip(),
         created_by=user,
-        ends_at=data.get("ends_at"),
+        ends_at=ends_at_data,
     )
 
     for opt in options_data:
